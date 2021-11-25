@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Restaurant
+from api.models import Restaurant, MenuCategory, Menu
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -23,3 +23,24 @@ class RestaurantSerializer(serializers.ModelSerializer):
         if name is None and image is None:
             raise serializers.ValidationError("Name or image is required.")
         return data
+
+
+class MenuCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuCategory
+        fields = [
+            'id',
+            'title',
+            'restaurant'
+        ]
+
+
+class MenuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Menu
+        fields = [
+            'id',
+            'title',
+            'price',
+            'category'
+        ]

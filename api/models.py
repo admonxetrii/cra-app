@@ -33,3 +33,26 @@ class Restaurant(models.Model):
 
     class Meta:
         db_table = "RESTAURANT"
+
+
+class MenuCategory(models.Model):
+    title = models.CharField(max_length=255, null=True, blank=True)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.restaurant.name + "'s " + self.title
+
+    class Meta:
+        db_table = "MENU_CATEGORY"
+
+
+class Menu(models.Model):
+    title = models.CharField(max_length=255, null=True, blank=True)
+    price = models.FloatField(null=True, blank=True)
+    category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.category.restaurant.name + "'s " + self.title
+
+    class Meta:
+        db_table = "MENU"
