@@ -14,6 +14,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'modifiedBy',
             'location'
         ]
+        read_only_fields = ['modifiedBy']
 
     def validate(self, data):
         name = data.get("name", None)
