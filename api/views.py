@@ -8,27 +8,6 @@ from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSeria
 
 
 # Create your views here.
-
-class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-                              generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAdminUser]
-    serializer_class = RestaurantSerializer
-    queryset = Restaurant.objects.all()
-    lookup_field = 'id'
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-    def perform_update(self, serializer):
-        serializer.save(modifiedBy=self.request.user, modifiedDate=datetime.datetime.now())
-
-
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     serializer_class = RestaurantSerializer
 
@@ -47,9 +26,26 @@ class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
         serializer.save(modifiedBy=self.request.user)
 
 
-class MenuCategoryAPI(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin,
-                      generics.ListAPIView):
+class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAdminUser]
+    serializer_class = RestaurantSerializer
+    queryset = Restaurant.objects.all()
+    lookup_field = 'id'
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save(modifiedBy=self.request.user, modifiedDate=datetime.datetime.now())
+
+
+class MenuCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     serializer_class = MenuCategorySerializer
 
     def get_queryset(self):
@@ -60,24 +56,14 @@ class MenuCategoryAPI(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins
             qs = qs.filter(title__icontains=query)
         return qs
 
-    def get_object(self):
-        request = self.request
-        passed_id = request.GET.get('id', None)
-        queryset = self.get_queryset()
-        obj = None
-        if passed_id is not None:
-            obj = get_object_or_404(queryset, id=passed_id)
-            self.check_object_permissions(request, obj)
-        return obj
-
-    def get(self, request, *args, **kwargs):
-        passed_id = request.GET.get('id', None)
-        if passed_id is not None:
-            return self.retrieve(request, *args, **kwargs)
-        return super().get(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class MenuCategoryDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    serializer_class = MenuCategorySerializer
+    queryset = MenuCategory.objects.all()
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
@@ -89,9 +75,7 @@ class MenuCategoryAPI(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins
         return self.destroy(request, *args, **kwargs)
 
 
-class MenuAPI(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-              mixins.DestroyModelMixin,
-              generics.ListAPIView):
+class MenuAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     serializer_class = MenuSerializer
 
     def get_queryset(self):
@@ -102,24 +86,14 @@ class MenuAPI(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateM
             qs = qs.filter(title__icontains=query)
         return qs
 
-    def get_object(self):
-        request = self.request
-        passed_id = request.GET.get('id', None)
-        queryset = self.get_queryset()
-        obj = None
-        if passed_id is not None:
-            obj = get_object_or_404(queryset, id=passed_id)
-            self.check_object_permissions(request, obj)
-        return obj
-
-    def get(self, request, *args, **kwargs):
-        passed_id = request.GET.get('id', None)
-        if passed_id is not None:
-            return self.retrieve(request, *args, **kwargs)
-        return super().get(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    serializer_class = MenuSerializer
+    queryset = Menu.objects.all()
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
