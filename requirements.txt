@@ -1,0 +1,12 @@
+Django==3.2.9
+Pillow==8.4.0
+PyJWT==1.7.1
+asgiref==3.4.1
+django-cors-headers==3.10.1
+djangorestframework==3.12.4
+djangorestframework-jwt==1.11.0
+mysqlclient==2.1.0
+pip==21.3.1
+pytz==2021.3
+setuptools==57.4.0
+sqlparse==0.4.2
