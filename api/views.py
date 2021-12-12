@@ -9,6 +9,8 @@ from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSeria
 
 # Create your views here.
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = []
     serializer_class = RestaurantSerializer
 
     def get_queryset(self):
