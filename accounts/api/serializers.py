@@ -12,10 +12,43 @@ expire_delta = api_settings.JWT_REFRESH_EXPIRATION_DELTA
 User = get_user_model()
 
 
+class UserDetailSerializer(serializers.Serializer):
+    uri = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'uri',
+        ]
+
+    def get_uri(self, obj):
+        return "/api/user/{id}/".format(id=obj.username)
+
+    def get_status_list(self, obj):
+        return "obj"
+
+class UserPublicSerializer(serializers.Serializer):
+    uri = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'uri',
+        ]
+
+    def get_uri(self, obj):
+        return "/api/users/{id}/".format(id=obj.id)
+
+
 class UserRegisterSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(style={'input_type', 'password'}, write_only=True)
     token = serializers.SerializerMethodField(read_only=True)
     expires = serializers.SerializerMethodField(read_only=True)
+    token_response = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
@@ -26,8 +59,16 @@ class UserRegisterSerializer(serializers.Serializer):
             'confirm_password',
             'token',
             'expires',
+            'token_response',
         ]
         extra_kwargs = {'password': {'write_only': True}}
+
+    def get_token_response(self, obj):
+        user = obj
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        response = jwt_response_payload_handler(token, user, request=None)
+        return response
 
     def get_expires(self, obj):
         return timezone.now() + expire_delta - datetime.timedelta(seconds=200)
