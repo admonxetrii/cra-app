@@ -6,7 +6,8 @@ from rest_framework.response import Response
 
 from rest_framework_jwt.settings import api_settings
 
-from .serializers import UserRegisterSerializer
+from .permissions import AnonPermissionOnly
+from .serializers import UserRegisterSerializer, UserDetailSerializer
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -15,9 +16,15 @@ jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 User = get_user_model()
 
 
+class UserDetailAPIView(generics.RetrieveAPIView):
+    queryset = User.objects.filter(is_active=True)
+    serializer_class = UserDetailSerializer
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'username'
+
 class AuthAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        permission_classes = [permissions.AllowAny]
+        permission_classes = [AnonPermissionOnly]
         print(request.user)
         if request.user.is_authenticated():
             return Response({'detail': 'You are already authenticated'}, status=400)
@@ -41,7 +48,7 @@ class AuthAPIView(APIView):
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AnonPermissionOnly]
 
 # class RegisterAPIView(APIView):
 #     serializer_class = UserRegisterSerializer
