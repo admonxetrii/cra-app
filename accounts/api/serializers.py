@@ -12,7 +12,6 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
-
 User = get_user_model()
 
 
@@ -49,8 +48,6 @@ class UserDetailSerializer(serializers.Serializer):
         return "obj"
 
 
-
-
 class UserPublicSerializer(serializers.Serializer):
     uri = serializers.SerializerMethodField(read_only=True)
 
@@ -65,6 +62,7 @@ class UserPublicSerializer(serializers.Serializer):
     def get_uri(self, obj):
         return "/api/users/{id}/".format(id=obj.id)
 
+
 class UserLoginSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -74,6 +72,7 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
 
         return token
+
 
 class UserRegisterSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(style={'input_type', 'password'}, write_only=True)
@@ -88,7 +87,6 @@ class UserRegisterSerializer(serializers.Serializer):
             'confirm_password',
         ]
         extra_kwargs = {'password': {'write_only': True}}
-
 
     def validate_email(self, value):
         qs = User.objects.filter(email__iexact=value)
@@ -114,7 +112,7 @@ class UserRegisterSerializer(serializers.Serializer):
         user_obj = User(username=validated_data.get('username'), email=validated_data.get('email'))
         user_obj.set_password(validated_data.get('password'))
         user_obj.save()
-        created_user = User.objects.get(username = validated_data.username)
+        created_user = User.objects.get(username=validated_data.username)
         user_profile = User.objects.create(user_id=created_user.id)
         user_profile.save()
         return user_obj
