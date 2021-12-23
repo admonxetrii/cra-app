@@ -10,8 +10,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .permissions import AnonPermissionOnly
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
-from .serializers import UserRegisterSerializer, UserDetailSerializer, UserProfileSerializer, UserLoginSerializer
-from ..models import UserProfile
+from .serializers import UserRegisterSerializer, UserDetailSerializer, UserLoginSerializer
 
 User = get_user_model()
 
@@ -47,15 +46,6 @@ class RegisterAPIView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AnonPermissionOnly]
 
-
-class UserProfileViewSet(generics.GenericAPIView):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
-
-    def get(self, request):
-        userProfileObj = User.objects.filter(id=request.user.id)
-        serializer = self.get_serializer(userProfileObj)
-        return Response(serializer.data)
 
 # class RegisterAPIView(APIView):
 #     serializer_class = UserRegisterSerializer

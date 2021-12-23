@@ -1,35 +1,88 @@
+from django.utils import timezone
+
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.utils.translation import gettext_lazy as _
 
 
 # Create your models here.
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile');
-    phonenumber = models.CharField(max_length=10, null=True, blank=True)
-    state = models.CharField(max_length=200, null=True, blank=True)
-    city = models.CharField(max_length=200, null=True, blank=True)
-    add1 = models.CharField(max_length=200, null=True, blank=True)
-    add2 = models.CharField(max_length=200, null=True, blank=True)
+
+class CustomAccountManager(BaseUserManager):
+    def create_superuser(self, email, username, first_name, last_name, password, **other_fields):
+        other_fields.setdefault('is_staff', True)
+        other_fields.setdefault('is_superuser', True)
+        other_fields.setdefault('is_active', True)
+
+        if other_fields.get('is_staff') is not True:
+            raise ValueError('Staff must be checked')
+
+        if other_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must be checked')
+
+        return self.create_user(email, username, first_name, last_name, password, **other_fields)
+
+    def create_user(self, email, username, first_name, last_name, password, **other_fields):
+        if not email:
+            raise ValueError(_('You must provide an email address.'))
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, username=username, first_name=first_name, last_name=last_name, **other_fields)
+        user.set_password(password)
+        user.save()
+        return user
 
 
-class Profilepic(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='User/', null=True, blank=True)
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_('email address'), unique=True)
+    username = models.CharField(max_length=150, unique=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+    phone_number = models.IntegerField(null=True, blank=True)
+    about = models.TextField(_(
+        'about'), max_length=500,null=True,  blank=True)
+    is_active = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+    is_customer = models.BooleanField(default=False)
+    is_premium_customer = models.BooleanField(default=False)
+    is_waiter = models.BooleanField(default=False)
+
+    objects = CustomAccountManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     def __str__(self):
-        return self.user.username
+        return self.username
 
-    def delete(self, *args, **kwargs):
-        self.image.delete()
-        super().delete(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        # delete old file when replacing by updating the file
-        try:
-            this = Profilepic.objects.get(id=self.id)
-            if this.image != self.image:
-                this.image.delete(save=False)
-        except:
-            pass  # when new photo then we do nothing, normal case
-        super(Profilepic, self).save(*args, **kwargs)
+#
+# class UserProfile(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='userprofile');
+#     phonenumber = models.CharField(max_length=10, null=True, blank=True)
+#     state = models.CharField(max_length=200, null=True, blank=True)
+#     city = models.CharField(max_length=200, null=True, blank=True)
+#     add1 = models.CharField(max_length=200, null=True, blank=True)
+#     add2 = models.CharField(max_length=200, null=True, blank=True)
+#
+#
+# class Profilepic(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+#     image = models.ImageField(upload_to='User/', null=True, blank=True)
+#
+#     def __str__(self):
+#         return self.user.username
+#
+#     def delete(self, *args, **kwargs):
+#         self.image.delete()
+#         super().delete(*args, **kwargs)
+#
+#     def save(self, *args, **kwargs):
+#         # delete old file when replacing by updating the file
+#         try:
+#             this = Profilepic.objects.get(id=self.id)
+#             if this.image != self.image:
+#                 this.image.delete(save=False)
+#         except:
+#             pass  # when new photo then we do nothing, normal case
+#         super(Profilepic, self).save(*args, **kwargs)

@@ -3,14 +3,9 @@ from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from accounts.models import UserProfile
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
-
-jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
 User = get_user_model()
 
@@ -19,15 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'is_admin', 'is_staff')
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    userprofile = UserSerializer(read_only=True)
-
-    class Meta:
-        model = UserProfile
-        fields = ('userprofile', 'state', 'city', 'phonenumber')
-        read_only_fields = ['user']
 
 
 class UserDetailSerializer(serializers.Serializer):
