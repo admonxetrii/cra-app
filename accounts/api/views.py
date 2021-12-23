@@ -1,19 +1,38 @@
+import jwt
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Q
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from rest_framework_jwt.settings import api_settings
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .permissions import AnonPermissionOnly
-from .serializers import UserRegisterSerializer, UserDetailSerializer
-
-jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from .serializers import UserRegisterSerializer, UserDetailSerializer, UserProfileSerializer, UserLoginSerializer
+from ..models import UserProfile
 
 User = get_user_model()
+
+
+class AuthAPIView(TokenObtainPairView):
+    permission_classes = [AnonPermissionOnly]
+    serializer_class = UserLoginSerializer
+
+class LogoutView(APIView):
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = (permissions.IsAuthenticated)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserDetailAPIView(generics.RetrieveAPIView):
@@ -22,33 +41,21 @@ class UserDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
     lookup_field = 'username'
 
-class AuthAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        permission_classes = [AnonPermissionOnly]
-        print(request.user)
-        if request.user.is_authenticated():
-            return Response({'detail': 'You are already authenticated'}, status=400)
-        username = request.get('username')
-        password = request.get('password')
-        qs = User.objects.filter(
-            Q(username__iexact=username) |
-            Q(email__iexact=username)
-        ).distinct()
-        if qs.count() == 1:
-            user_obj = qs.first()
-            if user_obj.check_password(password):
-                user = user_obj
-                payload = jwt_payload_handler(user)
-                token = jwt_encode_handler(payload)
-                response = jwt_response_payload_handler(token, user, request=request)
-                return Response(response)
-        return Response({'details': 'Invalid Credentials'}, status=401)
-
 
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
     permission_classes = [AnonPermissionOnly]
+
+
+class UserProfileViewSet(generics.GenericAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+
+    def get(self, request):
+        userProfileObj = User.objects.filter(id=request.user.id)
+        serializer = self.get_serializer(userProfileObj)
+        return Response(serializer.data)
 
 # class RegisterAPIView(APIView):
 #     serializer_class = UserRegisterSerializer
