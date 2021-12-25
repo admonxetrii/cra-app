@@ -41,7 +41,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     phone_number = models.IntegerField(null=True, blank=True)
     about = models.TextField(_(
-        'about'), max_length=500,null=True,  blank=True)
+        'about'), max_length=500, null=True, blank=True)
+    state = models.CharField(max_length=200, null=True, blank=True)
+    city = models.CharField(max_length=200, null=True, blank=True)
+    street = models.CharField(max_length=200, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='User/', null=True, blank=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_customer = models.BooleanField(default=False)
@@ -56,33 +60,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-#
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='userprofile');
-#     phonenumber = models.CharField(max_length=10, null=True, blank=True)
-#     state = models.CharField(max_length=200, null=True, blank=True)
-#     city = models.CharField(max_length=200, null=True, blank=True)
-#     add1 = models.CharField(max_length=200, null=True, blank=True)
-#     add2 = models.CharField(max_length=200, null=True, blank=True)
-#
-#
-# class Profilepic(models.Model):
-#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-#     image = models.ImageField(upload_to='User/', null=True, blank=True)
-#
-#     def __str__(self):
-#         return self.user.username
-#
-#     def delete(self, *args, **kwargs):
-#         self.image.delete()
-#         super().delete(*args, **kwargs)
-#
-#     def save(self, *args, **kwargs):
-#         # delete old file when replacing by updating the file
-#         try:
-#             this = Profilepic.objects.get(id=self.id)
-#             if this.image != self.image:
-#                 this.image.delete(save=False)
-#         except:
-#             pass  # when new photo then we do nothing, normal case
-#         super(Profilepic, self).save(*args, **kwargs)
+    def delete(self, *args, **kwargs):
+        self.profile_picture.delete()
+        super().delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # delete old file when replacing by updating the file
+        try:
+            this = self.objects.get(id=self.id)
+            if this.profile_picture != self.profile_picture:
+                this.profile_picture.delete(save=False)
+        except:
+            pass  # when new photo then we do nothing, normal case
+        super().save(*args, **kwargs)

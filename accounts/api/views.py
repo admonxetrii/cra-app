@@ -7,10 +7,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework_simplejwt.views import TokenObtainPairView
+from accounts.models import CustomUser
 
 from .permissions import AnonPermissionOnly
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
-from .serializers import UserRegisterSerializer, UserDetailSerializer, UserLoginSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
 
 User = get_user_model()
 
@@ -18,6 +19,7 @@ User = get_user_model()
 class AuthAPIView(TokenObtainPairView):
     permission_classes = [AnonPermissionOnly]
     serializer_class = UserLoginSerializer
+
 
 class LogoutView(APIView):
     authentication_classes = [JWTTokenUserAuthentication]
@@ -35,42 +37,22 @@ class LogoutView(APIView):
 
 
 class UserDetailAPIView(generics.RetrieveAPIView):
-    queryset = User.objects.filter(is_active=True)
-    serializer_class = UserDetailSerializer
     permission_classes = [permissions.AllowAny]
+    serializer_class = UserProfileSerializer
+    queryset = CustomUser.objects.all()
     lookup_field = 'username'
 
 
-class RegisterAPIView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRegisterSerializer
-    permission_classes = [AnonPermissionOnly]
+class CustomUserCreate(APIView):
+    permission_classes = [permissions.AllowAny]
 
+    def post(self, request):
+        print(request.data)
+        reg_serializer = UserRegisterSerializer(data=request.data)
+        if reg_serializer.is_valid():
+            newuser = reg_serializer.save()
+            if newuser:
+                return Response(status=status.HTTP_201_CREATED)
+            return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# class RegisterAPIView(APIView):
-#     serializer_class = UserRegisterSerializer
-#     def post(self, request, *args, **kwargs):
-#         permission_classes = [permissions.AllowAny]
-#         print(request.user)
-#         if request.user.is_authenticated():
-#             return Response({'detail': 'You are already authenticated'}, status=400)
-#         username = request.get('username')
-#         email = request.get('email')
-#         password = request.get('password')
-#         confirm_password = request.get('confpass')
-#         qs = User.objects.filter(
-#             Q(username__iexact=username) |
-#             Q(email__iexact=email)
-#         ).distinct()
-#         if password != confirm_password:
-#             return Response({"password": "Password doesn't match."}, status=401)
-#         if qs.exists():
-#             return Response({"details": "This user already exists."}, status=401)
-#         else:
-#             user = User.objects.create(username=username, email=email)
-#             user.set_password(password)
-#             user.save()
-#             payload = jwt_payload_handler(user)
-#             token = jwt_encode_handler(payload)
-#             response = jwt_response_payload_handler(token, user, request=request)
-#             return Response({"details": "Thank you for registering, please verify your email."}, status=201)

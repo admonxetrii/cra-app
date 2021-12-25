@@ -1,52 +1,34 @@
 import datetime
 from django.utils import timezone
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-
+from accounts.models import CustomUser
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.settings import api_settings
-
-User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.Serializer):
     class Meta:
-        model = User
-        fields = ('id', 'username', 'is_admin', 'is_staff')
-
-
-class UserDetailSerializer(serializers.Serializer):
-    uri = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = User
+        model = CustomUser
         fields = [
             'id',
             'username',
-            'uri',
+            'email',
+            'phone_number',
+            'first_name',
+            'last_name',
+            'street',
+            'city',
+            'state',
+            'about',
+            'profile_picture',
+            'is_active',
+            'is_superuser',
+            'is_staff',
+            'is_customer',
+            'is_premium_customer',
+            'is_waiter',
+            'date_joined'
         ]
-
-    def get_uri(self, obj):
-        return "/api/user/{id}/".format(id=obj.username)
-
-    def get_status_list(self, obj):
-        return "obj"
-
-
-class UserPublicSerializer(serializers.Serializer):
-    uri = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'username',
-            'uri',
-        ]
-
-    def get_uri(self, obj):
-        return "/api/users/{id}/".format(id=obj.id)
 
 
 class UserLoginSerializer(TokenObtainPairSerializer):
@@ -60,28 +42,34 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         return token
 
 
-class UserRegisterSerializer(serializers.Serializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(style={'input_type', 'password'}, write_only=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = [
+            'id',
             'username',
             'email',
-            'phone_number'
             'password',
             'confirm_password',
+            'phone_number',
+            'first_name',
+            'last_name',
+            'street',
+            'city',
+            'state',
         ]
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_email(self, value):
-        qs = User.objects.filter(email__iexact=value)
+        qs = CustomUser.objects.filter(email__iexact=value)
         if qs.exists():
             raise serializers.ValidationError("Email already exists")
         return value
 
     def validate_username(self, value):
-        qs = User.objects.filter(username__iexact=value)
+        qs = CustomUser.objects.filter(username__iexact=value)
         if qs.exists():
             raise serializers.ValidationError("Username already exists")
         return value
@@ -95,10 +83,8 @@ class UserRegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         print(validated_data)
-        user_obj = User(username=validated_data.get('username'), email=validated_data.get('email'))
-        user_obj.set_password(validated_data.get('password'))
+        password = validated_data.pop('password', None)
+        user_obj = self.Meta.model(**validated_data)
+        user_obj.set_password(password)
         user_obj.save()
-        created_user = User.objects.get(username=validated_data.username)
-        user_profile = User.objects.create(user_id=created_user.id)
-        user_profile.save()
         return user_obj
