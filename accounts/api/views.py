@@ -37,10 +37,11 @@ class LogoutView(APIView):
 
 
 class UserDetailAPIView(generics.RetrieveAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserProfileSerializer
-    queryset = CustomUser.objects.all()
-    lookup_field = 'username'
+
+    def get_object(self):
+        return self.request.user
 
 
 class CustomUserCreate(APIView):
@@ -55,4 +56,3 @@ class CustomUserCreate(APIView):
                 return Response(status=status.HTTP_201_CREATED)
             return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

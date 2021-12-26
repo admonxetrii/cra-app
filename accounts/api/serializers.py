@@ -6,7 +6,7 @@ from accounts.models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
-class UserProfileSerializer(serializers.Serializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
