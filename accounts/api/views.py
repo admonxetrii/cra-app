@@ -8,6 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from accounts.models import CustomUser
+from accounts.helpers import send_otp_to_email
+
+from django.core.mail import send_mail
+from crabackend import settings
 
 from .permissions import AnonPermissionOnly
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
@@ -48,11 +52,67 @@ class CustomUserCreate(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        print(request.data)
-        reg_serializer = UserRegisterSerializer(data=request.data)
-        if reg_serializer.is_valid():
+        try:
+            print(request.data)
+            reg_serializer = UserRegisterSerializer(data=request.data)
+
+            if not reg_serializer.is_valid():
+                return Response({"error": reg_serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
+
             newuser = reg_serializer.save()
             if newuser:
-                return Response(status=status.HTTP_201_CREATED)
-            return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                send_email_token(newuser)
+                return Response({"status": status.HTTP_201_CREATED,
+                                 "message": "Successfully Registered."})
+            return Response({"message": "Cannot create user!!", "status": status.HTTP_400_BAD_REQUEST})
+        except Exception as e:
+            print(e)
+            return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class VerifyOtp(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            user_obj = CustomUser.objects.get(email=data.get('email'))
+            otp = data.get('otp')
+            if user_obj.otp == otp:
+                user_obj.is_active = True
+                user_obj.save()
+                return Response({"message": "Account verified!!", "status": status.HTTP_200_OK})
+            return Response({"message": "Invalid OTP", "status": status.HTTP_403_FORBIDDEN})
+
+        except Exception as e:
+            print(e)
+        return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+    def patch(self, request):
+        try:
+            data = request.data
+            user_obj = CustomUser.objects.filter(email=data.get('email'))
+
+            if not user_obj.exists():
+                return Response({"message": "No user found", "status": status.HTTP_404_NOT_FOUND})
+
+            otpStatus, time = send_otp_to_email(data.get('email'), user_obj[0])
+            if otpStatus:
+                return Response({"message": "OTP sent successfully.", "status": status.HTTP_200_OK})
+            return Response({"message": f"Try after {time} seconds", "status": status.HTTP_404_NOT_FOUND})
+
+        except Exception as e:
+            print(e)
+        return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+
+def send_email_token(user_obj):
+    try:
+        subject = "Please verify your account for Pycemon Order"
+        message = f"Hi, Your OTP verification code is {user_obj.otp} please verify your account."
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [user_obj.email]
+        send_mail(subject, message, email_from, recipient_list)
+    except Exception as e:
+        print(e)
+    return "Cannot send OTP"

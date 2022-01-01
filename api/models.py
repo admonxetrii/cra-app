@@ -41,10 +41,25 @@ class Restaurant(models.Model):
 
 class MenuCategory(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
+    icon = models.ImageField(upload_to="uploads/category", null=True, blank=True)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.restaurant.name + "'s " + self.title
+
+    def delete(self, *args, **kwargs):
+        self.icon.delete()
+        super().delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # delete old file when replacing by updating the file
+        try:
+            this = Restaurant.objects.get(id=self.id)
+            if this.image != self.icon:
+                this.image.delete(save=False)
+        except:
+            pass  # when new photo then we do nothing, normal case
+        super(MenuCategory, self).save(*args, **kwargs)
 
     class Meta:
         db_table = "MENU_CATEGORY"
@@ -52,11 +67,27 @@ class MenuCategory(models.Model):
 
 class Menu(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
+    icon = models.ImageField(upload_to="uploads/menu", null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
     price = models.FloatField(null=True, blank=True)
     category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.category.restaurant.name + "'s " + self.title
+
+    def delete(self, *args, **kwargs):
+        self.icon.delete()
+        super().delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # delete old file when replacing by updating the file
+        try:
+            this = Restaurant.objects.get(id=self.id)
+            if this.image != self.icon:
+                this.image.delete(save=False)
+        except:
+            pass  # when new photo then we do nothing, normal case
+        super(Menu, self).save(*args, **kwargs)
 
     class Meta:
         db_table = "MENU"

@@ -22,6 +22,7 @@ class UserAdminConfig(UserAdmin):
         }),
         ('Permissions', {
             'fields': (
+                'otp',
                 'is_active',
                 'is_staff',
                 'is_superuser'

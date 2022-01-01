@@ -39,13 +39,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     date_joined = models.DateTimeField(default=timezone.now)
-    phone_number = models.IntegerField(null=True, blank=True)
+    phone_number = models.CharField(max_length=10, null=True, blank=True)
     about = models.TextField(_(
         'about'), max_length=500, null=True, blank=True)
     state = models.CharField(max_length=200, null=True, blank=True)
     city = models.CharField(max_length=200, null=True, blank=True)
     street = models.CharField(max_length=200, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='User/', null=True, blank=True)
+    otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_customer = models.BooleanField(default=False)
@@ -73,3 +74,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         except:
             pass  # when new photo then we do nothing, normal case
         super().save(*args, **kwargs)
+
+
+

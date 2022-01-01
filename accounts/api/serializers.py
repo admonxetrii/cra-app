@@ -3,6 +3,9 @@ from django.utils import timezone
 from rest_framework import serializers
 from accounts.models import CustomUser
 
+from accounts.helpers import send_otp_to_email
+
+
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
@@ -84,7 +87,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         print(validated_data)
         password = validated_data.pop('password', None)
+        confirm_password = validated_data.pop('confirm_password', None)
         user_obj = self.Meta.model(**validated_data)
         user_obj.set_password(password)
         user_obj.save()
+        send_otp_to_email(user_obj.email, user_obj)
         return user_obj
+
+
