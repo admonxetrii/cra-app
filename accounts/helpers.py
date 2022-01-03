@@ -1,7 +1,6 @@
 import random
 from django.core.cache import cache
 
-
 def send_otp_to_email(email, user_obj):
     if cache.get(email):
         return False, cache.ttl(email)

@@ -35,13 +35,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-
-        # Add custom claims
-        token['username'] = user.username
-
+    def validate(self, attrs):
+        token = super().validate(attrs)
+        refresh = self.get_token(self.user)
+        token['username'] = self.user.username
+        token['is_verified'] = self.user.is_verified
         return token
 
 

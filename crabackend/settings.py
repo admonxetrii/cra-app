@@ -154,7 +154,7 @@ EMAIL_HOST = 'mail.pycemontech.com.np'
 EMAIL_USE_TLS = False
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'no-reply@pycemontech.com.np'
-EMAIL_HOST_PASSWORD = '_OGr@ng;F=^7'
+EMAIL_HOST_PASSWORD = 'PlA8!f?88MhB'
 
 
 CACHES = {

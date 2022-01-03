@@ -1,11 +1,8 @@
-import jwt
 from django.contrib.auth import authenticate, get_user_model
-from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from rest_framework_simplejwt.views import TokenObtainPairView
 from accounts.models import CustomUser
 from accounts.helpers import send_otp_to_email
@@ -61,9 +58,9 @@ class CustomUserCreate(APIView):
 
             newuser = reg_serializer.save()
             if newuser:
-                send_email_token(newuser)
+                # send_email_token(newuser)
                 return Response({"status": status.HTTP_201_CREATED,
-                                 "message": "Successfully Registered."})
+                                 "message": "Successfully Registered.", "username": newuser.username})
             return Response({"message": "Cannot create user!!", "status": status.HTTP_400_BAD_REQUEST})
         except Exception as e:
             print(e)
@@ -75,23 +72,26 @@ class VerifyOtp(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            data = request.data
-            user_obj = CustomUser.objects.get(email=data.get('email'))
-            otp = data.get('otp')
+            otpData = request.data
+            print(request.data)
+            user_obj = CustomUser.objects.get(username=otpData.get('username'))
+            otp = otpData.get('otp')
             if user_obj.otp == otp:
-                user_obj.is_active = True
+                user_obj.is_verified = True
                 user_obj.save()
-                return Response({"message": "Account verified!!", "status": status.HTTP_200_OK})
+                tokenr = RefreshToken.for_user(user_obj)
+                return Response(
+                    {"message": "Account verified!!", "status": status.HTTP_200_OK, "access": str(tokenr.access_token)})
             return Response({"message": "Invalid OTP", "status": status.HTTP_403_FORBIDDEN})
 
         except Exception as e:
             print(e)
-        return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+        return Response({"message": "Something went wrong", "status": status.HTTP_400_BAD_REQUEST})
 
     def patch(self, request):
         try:
             data = request.data
-            user_obj = CustomUser.objects.filter(email=data.get('email'))
+            user_obj = CustomUser.objects.filter(username=data.get('username'))
 
             if not user_obj.exists():
                 return Response({"message": "No user found", "status": status.HTTP_404_NOT_FOUND})

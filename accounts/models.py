@@ -13,6 +13,7 @@ class CustomAccountManager(BaseUserManager):
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
+        other_fields.setdefault('is_verified', True)
 
         if other_fields.get('is_staff') is not True:
             raise ValueError('Staff must be checked')
@@ -47,7 +48,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     street = models.CharField(max_length=200, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='User/', null=True, blank=True)
     otp = models.CharField(max_length=6, null=True, blank=True)
-    is_active = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_customer = models.BooleanField(default=False)
     is_premium_customer = models.BooleanField(default=False)
