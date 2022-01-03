@@ -5,7 +5,7 @@ class AnonPermissionOnly(permissions.BasePermission):
     message = "You are already authenticated. Please logout to perform this action."
 
     def has_permission(self, request, view):
-        return not request.user.is_authenticated()
+        return not request.user.is_authenticated
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):

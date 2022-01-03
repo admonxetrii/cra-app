@@ -3,14 +3,16 @@ from rest_framework import generics, mixins, permissions
 from rest_framework.authentication import SessionAuthentication
 import datetime
 
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+
 from .models import Restaurant, MenuCategory, Menu
 from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer
 
 
 # Create your views here.
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantSerializer
 
     def get_queryset(self):

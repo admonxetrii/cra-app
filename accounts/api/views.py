@@ -1,79 +1,118 @@
 from django.contrib.auth import authenticate, get_user_model
-from django.db.models import Q
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from accounts.models import CustomUser
+from accounts.helpers import send_otp_to_email
 
-from rest_framework_jwt.settings import api_settings
+from django.core.mail import send_mail
+from crabackend import settings
 
 from .permissions import AnonPermissionOnly
-from .serializers import UserRegisterSerializer, UserDetailSerializer
-
-jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
 
 User = get_user_model()
 
 
-class UserDetailAPIView(generics.RetrieveAPIView):
-    queryset = User.objects.filter(is_active=True)
-    serializer_class = UserDetailSerializer
-    permission_classes = [permissions.AllowAny]
-    lookup_field = 'username'
-
-class AuthAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        permission_classes = [AnonPermissionOnly]
-        print(request.user)
-        if request.user.is_authenticated():
-            return Response({'detail': 'You are already authenticated'}, status=400)
-        username = request.get('username')
-        password = request.get('password')
-        qs = User.objects.filter(
-            Q(username__iexact=username) |
-            Q(email__iexact=username)
-        ).distinct()
-        if qs.count() == 1:
-            user_obj = qs.first()
-            if user_obj.check_password(password):
-                user = user_obj
-                payload = jwt_payload_handler(user)
-                token = jwt_encode_handler(payload)
-                response = jwt_response_payload_handler(token, user, request=request)
-                return Response(response)
-        return Response({'details': 'Invalid Credentials'}, status=401)
-
-
-class RegisterAPIView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRegisterSerializer
+class AuthAPIView(TokenObtainPairView):
     permission_classes = [AnonPermissionOnly]
+    serializer_class = UserLoginSerializer
 
-# class RegisterAPIView(APIView):
-#     serializer_class = UserRegisterSerializer
-#     def post(self, request, *args, **kwargs):
-#         permission_classes = [permissions.AllowAny]
-#         print(request.user)
-#         if request.user.is_authenticated():
-#             return Response({'detail': 'You are already authenticated'}, status=400)
-#         username = request.get('username')
-#         email = request.get('email')
-#         password = request.get('password')
-#         confirm_password = request.get('confpass')
-#         qs = User.objects.filter(
-#             Q(username__iexact=username) |
-#             Q(email__iexact=email)
-#         ).distinct()
-#         if password != confirm_password:
-#             return Response({"password": "Password doesn't match."}, status=401)
-#         if qs.exists():
-#             return Response({"details": "This user already exists."}, status=401)
-#         else:
-#             user = User.objects.create(username=username, email=email)
-#             user.set_password(password)
-#             user.save()
-#             payload = jwt_payload_handler(user)
-#             token = jwt_encode_handler(payload)
-#             response = jwt_response_payload_handler(token, user, request=request)
-#             return Response({"details": "Thank you for registering, please verify your email."}, status=201)
+
+class LogoutView(APIView):
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = (permissions.IsAuthenticated)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        return self.request.user
+
+
+class CustomUserCreate(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        try:
+            print(request.data)
+            reg_serializer = UserRegisterSerializer(data=request.data)
+
+            if not reg_serializer.is_valid():
+                return Response({"error": reg_serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
+
+            newuser = reg_serializer.save()
+            if newuser:
+                # send_email_token(newuser)
+                return Response({"status": status.HTTP_201_CREATED,
+                                 "message": "Successfully Registered.", "username": newuser.username})
+            return Response({"message": "Cannot create user!!", "status": status.HTTP_400_BAD_REQUEST})
+        except Exception as e:
+            print(e)
+            return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class VerifyOtp(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            otpData = request.data
+            print(request.data)
+            user_obj = CustomUser.objects.get(username=otpData.get('username'))
+            otp = otpData.get('otp')
+            if user_obj.otp == otp:
+                user_obj.is_verified = True
+                user_obj.save()
+                tokenr = RefreshToken.for_user(user_obj)
+                return Response(
+                    {"message": "Account verified!!", "status": status.HTTP_200_OK, "access": str(tokenr.access_token)})
+            return Response({"message": "Invalid OTP", "status": status.HTTP_403_FORBIDDEN})
+
+        except Exception as e:
+            print(e)
+        return Response({"message": "Something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+    def patch(self, request):
+        try:
+            data = request.data
+            user_obj = CustomUser.objects.filter(username=data.get('username'))
+
+            if not user_obj.exists():
+                return Response({"message": "No user found", "status": status.HTTP_404_NOT_FOUND})
+
+            otpStatus, time = send_otp_to_email(data.get('email'), user_obj[0])
+            if otpStatus:
+                return Response({"message": "OTP sent successfully.", "status": status.HTTP_200_OK})
+            return Response({"message": f"Try after {time} seconds", "status": status.HTTP_404_NOT_FOUND})
+
+        except Exception as e:
+            print(e)
+        return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+
+def send_email_token(user_obj):
+    try:
+        subject = "Please verify your account for Pycemon Order"
+        message = f"Hi, Your OTP verification code is {user_obj.otp} please verify your account."
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [user_obj.email]
+        send_mail(subject, message, email_from, recipient_list)
+    except Exception as e:
+        print(e)
+    return "Cannot send OTP"
