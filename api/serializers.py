@@ -49,5 +49,22 @@ class MenuSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'price',
-            'category'
         ]
+
+
+class MenuCategoryListBasedOnRestaurant(serializers.ModelSerializer):
+    menus = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = MenuCategory
+        fields = [
+            'id',
+            'title',
+            'icon',
+            'menus',
+        ]
+        read_only_fields = ['menus']
+
+    def get_menus(self, obj):
+        qs = obj.category.all()
+        return MenuSerializer(qs, many=True).data

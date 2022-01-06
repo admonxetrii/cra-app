@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, mixins, permissions
+from rest_framework import generics, mixins, permissions, viewsets
 from rest_framework.authentication import SessionAuthentication
 import datetime
 
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
 from .models import Restaurant, MenuCategory, Menu
-from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer
+from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, MenuCategoryListBasedOnRestaurant
 
 
 # Create your views here.
@@ -107,3 +107,16 @@ class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, gener
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = MenuCategoryListBasedOnRestaurant
+
+    def get_queryset(self, *args, **kwargs):
+        restaurant = self.kwargs.get("id", None)
+        if restaurant is None:
+            return MenuCategory.objects.none()
+        return MenuCategory.objects.filter(restaurant_id=restaurant)
+
+
