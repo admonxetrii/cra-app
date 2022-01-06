@@ -14,7 +14,7 @@ class RestaurantType(models.Model):
         return self.name
 
     class Meta:
-        db_table = "RESTAURANT_TYPE"
+        db_table = "RESTAURANT_TYPE_MASTER"
 
 
 class Restaurant(models.Model):
@@ -47,7 +47,7 @@ class Restaurant(models.Model):
         super(Restaurant, self).save(*args, **kwargs)
 
     class Meta:
-        db_table = "RESTAURANT"
+        db_table = "RESTAURANT_MASTER"
 
 
 class RestaurantTypeOfRestaurant(models.Model):
@@ -55,10 +55,10 @@ class RestaurantTypeOfRestaurant(models.Model):
     restaurantType = models.ForeignKey(RestaurantType, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.restaurant.name + " " + self.restaurantType.name
+        return self.restaurant.name + " as " + self.restaurantType.name
 
     class Meta:
-        db_table = "RESTAURANT_TYPE_OF_RESTAURANT"
+        db_table = "RESTAURANT_TYPE_RESTAURANT_MASTER"
 
 
 class RestaurantFeaturedMenu(models.Model):
@@ -68,7 +68,7 @@ class RestaurantFeaturedMenu(models.Model):
         return self.name
 
     class Meta:
-        db_table = "RESTAURANT_FEATURED_MENU"
+        db_table = "FEATURE_TYPE_MASTER"
 
 
 class RestaurantFeaturedMenuForRestaurant(models.Model):
@@ -79,7 +79,7 @@ class RestaurantFeaturedMenuForRestaurant(models.Model):
         return self.restaurantFeaturedMenu.name + "'s " + self.restaurant.name
 
     class Meta:
-        db_table = "RESTAURANT_FEATURED_MENU_FOR_RESTAURANT"
+        db_table = "FEATURE_TYPE_RESTAURANT_MASTER"
 
 
 class MenuCategory(models.Model):
@@ -113,7 +113,7 @@ class Menu(models.Model):
     icon = models.ImageField(upload_to="uploads/menu", null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     price = models.FloatField(null=True, blank=True)
-    category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, related_name='category', null=True, blank=True)
 
     def __str__(self):
         return self.category.restaurant.name + "'s " + self.title
