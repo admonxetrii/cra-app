@@ -28,6 +28,7 @@ class Restaurant(models.Model):
     addedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     modifiedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     modifiedBy = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    restaurantType = models.ManyToManyField(RestaurantType)
 
     def __str__(self):
         return self.name
@@ -49,16 +50,6 @@ class Restaurant(models.Model):
     class Meta:
         db_table = "RESTAURANT_MASTER"
 
-
-class RestaurantTypeOfRestaurant(models.Model):
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
-    restaurantType = models.ForeignKey(RestaurantType, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.restaurant.name + " as " + self.restaurantType.name
-
-    class Meta:
-        db_table = "RESTAURANT_TYPE_RESTAURANT_MASTER"
 
 
 class RestaurantFeaturedMenu(models.Model):

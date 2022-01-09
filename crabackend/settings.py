@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-$4o*84m$ny7*n-_6t%xvups59kg@8qi&0m4*!9lpt9vz1diqa+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.96', 'localhost', '127.0.0.1', '192.168.0.110', '192.168.150.165', '192.168.254.113']
+ALLOWED_HOSTS = ['192.168.1.96', 'localhost', '127.0.0.1', '192.168.0.108', '192.168.150.165', '192.168.254.113']
 
 # Application definition
 
@@ -150,11 +150,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = "django_smtp_ssl.SSLEmailBackend"
-EMAIL_HOST = 'mail.pycemontech.com.np'
+EMAIL_HOST = 'mail.nishamwagle.com.np'
 EMAIL_USE_TLS = False
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'no-reply@pycemontech.com.np'
-EMAIL_HOST_PASSWORD = 'PlA8!f?88MhB'
+EMAIL_HOST_USER = 'no-reply@nishamwagle.com.np'
+EMAIL_HOST_PASSWORD = 'fqE4L&FO_)1f'
 
 
 CACHES = {

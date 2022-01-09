@@ -1,5 +1,24 @@
 from rest_framework import serializers
-from api.models import Restaurant, MenuCategory, Menu
+from api.models import Restaurant, MenuCategory, Menu, RestaurantType
+
+
+class RestaurantCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestaurantType
+        fields = [
+            'id',
+            'name',
+            'icon',
+        ]
+
+    def validate(self, data):
+        name = data.get("name", None)
+        if name == "":
+            name = None
+        icon = data.get("icon", None)
+        if name is None and icon is None:
+            raise serializers.ValidationError("Name or image is required.")
+        return data
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -68,3 +87,4 @@ class MenuCategoryListBasedOnRestaurant(serializers.ModelSerializer):
     def get_menus(self, obj):
         qs = obj.category.all()
         return MenuSerializer(qs, many=True).data
+

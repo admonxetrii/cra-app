@@ -5,8 +5,9 @@ import datetime
 
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
-from .models import Restaurant, MenuCategory, Menu
-from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, MenuCategoryListBasedOnRestaurant
+from .models import Restaurant, MenuCategory, Menu, RestaurantType
+from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, \
+    MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer
 
 
 # Create your views here.
@@ -18,6 +19,25 @@ class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     def get_queryset(self):
         request = self.request
         qs = Restaurant.objects.all()
+        query = request.GET.get('q')
+        if query is not None:
+            qs = qs.filter(name__icontains=query)
+        return qs
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(modifiedBy=self.request.user)
+
+
+class RestaurantCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RestaurantCategorySerializer
+
+    def get_queryset(self):
+        request = self.request
+        qs = RestaurantType.objects.all()
         query = request.GET.get('q')
         if query is not None:
             qs = qs.filter(name__icontains=query)
@@ -119,4 +139,14 @@ class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
             return MenuCategory.objects.none()
         return MenuCategory.objects.filter(restaurant_id=restaurant)
 
+
+class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RestaurantSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        restaurantType_id = self.kwargs.get("id", None)
+        if restaurantType_id is None:
+            return Restaurant.objects.none()
+        return Restaurant.objects.filter(restaurantType__id=restaurantType_id)
 

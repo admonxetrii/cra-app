@@ -91,12 +91,12 @@ class VerifyOtp(APIView):
     def patch(self, request):
         try:
             data = request.data
-            user_obj = CustomUser.objects.filter(username=data.get('username'))
+            user_obj = CustomUser.objects.get(username=data.get('username'))
 
             if not user_obj.exists():
                 return Response({"message": "No user found", "status": status.HTTP_404_NOT_FOUND})
 
-            otpStatus, time = send_otp_to_email(data.get('email'), user_obj[0])
+            otpStatus, time = send_otp_to_email(data.get('email'), user_obj)
             if otpStatus:
                 return Response({"message": "OTP sent successfully.", "status": status.HTTP_200_OK})
             return Response({"message": f"Try after {time} seconds", "status": status.HTTP_404_NOT_FOUND})
