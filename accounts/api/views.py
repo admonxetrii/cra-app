@@ -14,6 +14,8 @@ from .permissions import AnonPermissionOnly
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
 
+import string, random
+
 User = get_user_model()
 
 
@@ -104,6 +106,57 @@ class VerifyOtp(APIView):
         except Exception as e:
             print(e)
         return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class ForgotPassword(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            email = data.get('email')
+            try:
+                user_obj = CustomUser.objects.get(email=email)
+            except Exception as e:
+                return Response({"message": "No user found", "status": status.HTTP_404_NOT_FOUND})
+            characters = string.ascii_letters + string.digits
+            password = ''.join(random.choice(characters) for i in range(8))
+            user_obj.set_password(password)
+            user_obj.save()
+            print(password)
+            return Response({"message": "New password has been sent to email.", "status": status.HTTP_200_OK})
+        except Exception as e:
+            print(e)
+        return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class ChangePassword(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            current_password = data.get('currentPassword')
+            new_password = data.get('password')
+            confirm_password = data.get('confirmPassword')
+            username = data.get('username')
+
+            user = authenticate(username=username, password=current_password)
+            if user is not None:
+                user_obj = CustomUser.objects.get(username=username)
+                if new_password == confirm_password:
+                    user_obj.set_password(new_password)
+                    user_obj.save()
+                    return Response({"message": "New password has been set.", "status": status.HTTP_200_OK})
+                else:
+                    return Response({"message": "Your passwords does not match", "status": status.HTTP_400_BAD_REQUEST})
+            else:
+                print("Password Milena")
+                return Response(
+                    {"message": "Your current password did not matched", "status": status.HTTP_400_BAD_REQUEST})
+        except Exception as e:
+            print(e)
+            return Response({"message": "Something went wrong.", "status": status.HTTP_400_BAD_REQUEST})
 
 
 def send_email_token(user_obj):
