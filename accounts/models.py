@@ -40,7 +40,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     date_joined = models.DateTimeField(default=timezone.now)
-    phone_number = models.CharField(max_length=10, null=True, blank=True)
+    phone_number = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    gender = models.CharField(max_length=10, null=True, blank=True)
     about = models.TextField(_(
         'about'), max_length=500, null=True, blank=True)
     state = models.CharField(max_length=200, null=True, blank=True)

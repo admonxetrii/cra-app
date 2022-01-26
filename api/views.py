@@ -1,13 +1,18 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, mixins, permissions, viewsets
+from rest_framework import generics, mixins, permissions, viewsets, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 import datetime
 
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
-from .models import Restaurant, MenuCategory, Menu, RestaurantType
+from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation
 from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, \
     MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer
+
+from algorithm.cosine_similarity import descriptionCosineSimilarity
 
 
 # Create your views here.
@@ -150,3 +155,73 @@ class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
             return Restaurant.objects.none()
         return Restaurant.objects.filter(restaurantType__id=restaurantType_id)
 
+
+class CheckSimilarityOfRestaurants(APIView):
+    permissions_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            restaurantA = Restaurant.objects.all()
+            for rA in restaurantA:
+                for rB in restaurantA:
+                    similarityCalculationObjectsAwithB = similarityCalculation.objects.filter(restaurantA=rA,
+                                                                                              restaurantB=rB)
+                    similarityCalculationObjectsBwithA = similarityCalculation.objects.filter(restaurantA=rB,
+                                                                                              restaurantB=rA)
+                    if similarityCalculationObjectsAwithB.exists():
+                        continue
+                    elif similarityCalculationObjectsBwithA.exists():
+                        continue
+                    elif rA.id == rB.id:
+                        continue
+                    else:
+                        similarityPercentage = descriptionCosineSimilarity(rA.description, rB.description)
+                        if similarityPercentage >= 0.15:
+                            similarity = similarityCalculation.objects.create(restaurantA=rA, restaurantB=rB,
+                                                                              similarityPercent=float(
+                                                                                  similarityPercentage))
+                            similarity.save()
+                        else:
+                            print("Restaurant are not similar.")
+            return Response({"message": "done", "status": status.HTTP_200_OK})
+        except Exception as e:
+            print(e)
+            return Response({"message": "creation failed", "status": status.HTTP_417_EXPECTATION_FAILED})
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            similarityCalculationObjects = similarityCalculation.objects.all()
+            for sc in similarityCalculationObjects:
+                rA = sc.restaurantA
+                rB = sc.restaurantB
+                similarityPercentage = descriptionCosineSimilarity(rA.description, rB.description)
+                if similarityPercentage >= 0.15:
+                    sc.similarityPercent = similarityPercentage
+                    sc.save()
+                else:
+                    sc.delete()
+                    print("Restaurant are not similar.")
+            return Response({"message": "done", "status": status.HTTP_200_OK})
+        except Exception as e:
+            print(e)
+            return Response({"message": "update failed", "status": status.HTTP_417_EXPECTATION_FAILED})
+
+
+class GetSimilarRestaurants(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RestaurantSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        restaurantId = self.kwargs.get("id", None)
+        if restaurantId is None:
+            return Restaurant.objects.none()
+        similarities = similarityCalculation.objects.filter(
+            Q(restaurantA__id__iexact=restaurantId) | Q(restaurantB__id__iexact=restaurantId)).order_by('-similarityPercent')
+
+        id_set = []
+        for s in similarities:
+            if s.restaurantA.id == restaurantId:
+                id_set.append(s.restaurantB.id)
+            elif s.restaurantB.id == restaurantId:
+                id_set.append(s.restaurantA.id)
+        return Restaurant.objects.filter(id__in=id_set)

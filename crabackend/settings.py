@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-$4o*84m$ny7*n-_6t%xvups59kg@8qi&0m4*!9lpt9vz1diqa+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.96', 'localhost', '127.0.0.1', '192.168.0.101', '192.168.150.165', '192.168.254.113', '192.168.43.152']
+ALLOWED_HOSTS = ['192.168.1.96', 'localhost', '127.0.0.1', '192.168.0.107', '192.168.150.165', '192.168.254.9', '192.168.43.152']
 
 # Application definition
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'api',
+    'cart',
     'accounts',
 ]
 

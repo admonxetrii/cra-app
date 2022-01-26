@@ -26,6 +26,7 @@ class Restaurant(models.Model):
     rating = models.FloatField(null=True, blank=True)
     isClosedTemporarily = models.BooleanField(null=True, blank=True)
     addedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    description = models.TextField(max_length=1000, null=True, blank=True)
     modifiedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     modifiedBy = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     restaurantType = models.ManyToManyField(RestaurantType)
@@ -125,3 +126,9 @@ class Menu(models.Model):
 
     class Meta:
         db_table = "MENU"
+
+class similarityCalculation(models.Model):
+    restaurantA = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantA')
+    restaurantB = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantB')
+    similarityPercent = models.FloatField()
+

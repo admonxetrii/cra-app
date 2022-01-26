@@ -30,6 +30,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'icon',
             'image',
             'address',
+            'description',
             'isOpenNow',
             'rating',
             'isClosedTemporarily',
