@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from api.models import Restaurant, MenuCategory, Menu, RestaurantType
+from api.models import Restaurant, MenuCategory, Menu, RestaurantType, RestaurantTable, RestaurantFloorLevel, \
+    TableReservationDates
 
 
 class RestaurantCategorySerializer(serializers.ModelSerializer):
@@ -32,6 +33,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'address',
             'description',
             'isOpenNow',
+            'openingTime',
+            'closingTime',
             'rating',
             'isClosedTemporarily',
             'addedDate',
@@ -62,6 +65,16 @@ class MenuCategorySerializer(serializers.ModelSerializer):
         ]
 
 
+class RestaurantFloorLevelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestaurantFloorLevel
+        fields = [
+            'id',
+            'floorName',
+            'restaurant'
+        ]
+
+
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
@@ -69,6 +82,32 @@ class MenuSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'price',
+        ]
+
+
+class TableReservationDateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TableReservationDates
+        fields = [
+            'id',
+            'date',
+        ]
+
+
+class TableSerializer(serializers.ModelSerializer):
+    reservationDate = TableReservationDateSerializer()
+
+    class Meta:
+        model = RestaurantTable
+        fields = [
+            'id',
+            'tableName',
+            'seatCapacity',
+            'isOccupied',
+            'occHrs',
+            'occMin',
+            'reservationDate',
+            'merged',
         ]
 
 
@@ -89,3 +128,19 @@ class MenuCategoryListBasedOnRestaurant(serializers.ModelSerializer):
         qs = obj.category.all()
         return MenuSerializer(qs, many=True).data
 
+
+class FloorLevelListBasedOnRestaurant(serializers.ModelSerializer):
+    tables = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = RestaurantFloorLevel
+        fields = [
+            'id',
+            'floorName',
+            'tables',
+        ]
+        read_only_fields = ['tables']
+
+    def get_tables(self, obj):
+        qs = obj.floorLevel.all()
+        return TableSerializer(qs, many=True).data

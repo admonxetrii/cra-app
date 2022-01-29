@@ -23,6 +23,8 @@ class Restaurant(models.Model):
     image = models.ImageField(upload_to="uploads/restaurants", null=True, blank=True)
     address = models.CharField(max_length=30, null=True, blank=True)
     isOpenNow = models.BooleanField(null=True, blank=True)
+    openingTime = models.TimeField(null=True, blank=True)
+    closingTime = models.TimeField(null=True, blank=True)
     rating = models.FloatField(null=True, blank=True)
     isClosedTemporarily = models.BooleanField(null=True, blank=True)
     addedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -50,7 +52,6 @@ class Restaurant(models.Model):
 
     class Meta:
         db_table = "RESTAURANT_MASTER"
-
 
 
 class RestaurantFeaturedMenu(models.Model):
@@ -127,8 +128,49 @@ class Menu(models.Model):
     class Meta:
         db_table = "MENU"
 
+
 class similarityCalculation(models.Model):
     restaurantA = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantA')
     restaurantB = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantB')
     similarityPercent = models.FloatField()
+
+
+class RestaurantFloorLevel(models.Model):
+    floorName = models.CharField(max_length=65, null=True, blank=True)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        db_table = "RESTAURANT_FLOOR_MASTER"
+
+    def __str__(self):
+        return self.restaurant.name + '\'s ' + self.floorName
+
+
+class TableReservationDates(models.Model):
+    date = models.DateTimeField(null=True, blank=True)
+
+class RestaurantTable(models.Model):
+    tableName = models.CharField(max_length=65, null=True, blank=True)
+    seatCapacity = models.IntegerField(null=True, blank=True)
+    isOccupied = models.BooleanField(default=False, null=True, blank=True)
+    occHrs = models.IntegerField(null=True, blank=True)
+    occMin = models.IntegerField(null=True, blank=True)
+    reservationDate = models.ManyToManyField(TableReservationDates, null=True, blank=True)
+    merged = models.IntegerField(null=True, blank=True)
+    floorLevel = models.ForeignKey(RestaurantFloorLevel, on_delete=models.CASCADE, related_name='floorLevel', null=True, blank=True)
+
+    class Meta:
+        db_table = "TABLE_MASTER"
+
+    def __str__(self):
+        return self.tableName
+
+
+class MergeTable(models.Model):
+    table1 = models.ForeignKey(RestaurantTable, on_delete=models.CASCADE, related_name='table1')
+    table2 = models.ForeignKey(RestaurantTable, on_delete=models.CASCADE, related_name='table2')
+
+    class Meta:
+        db_table = "TABLE_MERGE"
+
 

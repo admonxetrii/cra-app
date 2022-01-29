@@ -8,16 +8,15 @@ import datetime
 
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
-from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation
+from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation, RestaurantFloorLevel
 from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, \
-    MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer
+    MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer, FloorLevelListBasedOnRestaurant
 
 from algorithm.cosine_similarity import descriptionCosineSimilarity
 
 
 # Create your views here.
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
-    authentication_classes = [JWTTokenUserAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantSerializer
 
@@ -56,7 +55,8 @@ class RestaurantCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 
 class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantSerializer
     queryset = Restaurant.objects.all()
     lookup_field = 'id'
@@ -75,6 +75,7 @@ class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin,
 
 
 class MenuCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategorySerializer
 
     def get_queryset(self):
@@ -90,6 +91,7 @@ class MenuCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 
 class MenuCategoryDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategorySerializer
     queryset = MenuCategory.objects.all()
     lookup_field = 'id'
@@ -105,6 +107,7 @@ class MenuCategoryDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixi
 
 
 class MenuAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuSerializer
 
     def get_queryset(self):
@@ -120,6 +123,7 @@ class MenuAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 
 class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuSerializer
     queryset = Menu.objects.all()
     lookup_field = 'id'
@@ -135,7 +139,7 @@ class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, gener
 
 
 class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
-    permission_classes = [permissions.AllowAny]
+    permissions_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategoryListBasedOnRestaurant
 
     def get_queryset(self, *args, **kwargs):
@@ -146,7 +150,6 @@ class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
 
 
 class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
-    permission_classes = [permissions.AllowAny]
     serializer_class = RestaurantSerializer
 
     def get_queryset(self, *args, **kwargs):
@@ -157,7 +160,7 @@ class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
 
 
 class CheckSimilarityOfRestaurants(APIView):
-    permissions_classes = [permissions.AllowAny]
+    permissions_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         try:
@@ -216,7 +219,8 @@ class GetSimilarRestaurants(generics.ListAPIView):
         if restaurantId is None:
             return Restaurant.objects.none()
         similarities = similarityCalculation.objects.filter(
-            Q(restaurantA__id__iexact=restaurantId) | Q(restaurantB__id__iexact=restaurantId)).order_by('-similarityPercent')
+            Q(restaurantA__id__iexact=restaurantId) | Q(restaurantB__id__iexact=restaurantId)).order_by(
+            '-similarityPercent')[:10]
 
         id_set = []
         for s in similarities:
@@ -225,3 +229,15 @@ class GetSimilarRestaurants(generics.ListAPIView):
             elif s.restaurantB.id == restaurantId:
                 id_set.append(s.restaurantA.id)
         return Restaurant.objects.filter(id__in=id_set)
+
+
+class TableListBasedOnRestaurantAPIView(generics.ListAPIView):
+    permissions_classes = [permissions.IsAuthenticated]
+    serializer_class = FloorLevelListBasedOnRestaurant
+
+    def get_queryset(self, *args, **kwargs):
+        restaurant = self.kwargs.get("id", None)
+        if restaurant is None:
+            return RestaurantFloorLevel.objects.none()
+        return RestaurantFloorLevel.objects.filter(restaurant_id=restaurant)
+
