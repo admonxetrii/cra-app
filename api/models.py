@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-
+from accounts.models import CustomUser
 
 # my custom methods
 
@@ -146,16 +146,12 @@ class RestaurantFloorLevel(models.Model):
         return self.restaurant.name + '\'s ' + self.floorName
 
 
-class TableReservationDates(models.Model):
-    date = models.DateTimeField(null=True, blank=True)
-
 class RestaurantTable(models.Model):
     tableName = models.CharField(max_length=65, null=True, blank=True)
     seatCapacity = models.IntegerField(null=True, blank=True)
     isOccupied = models.BooleanField(default=False, null=True, blank=True)
     occHrs = models.IntegerField(null=True, blank=True)
     occMin = models.IntegerField(null=True, blank=True)
-    reservationDate = models.ManyToManyField(TableReservationDates, null=True, blank=True)
     merged = models.IntegerField(null=True, blank=True)
     floorLevel = models.ForeignKey(RestaurantFloorLevel, on_delete=models.CASCADE, related_name='floorLevel', null=True, blank=True)
 
@@ -164,6 +160,12 @@ class RestaurantTable(models.Model):
 
     def __str__(self):
         return self.tableName
+
+class TableReservationDates(models.Model):
+    date = models.DateTimeField(null=True, blank=True)
+    groupSize = models.IntegerField(null=True, blank=True)
+    table = models.ForeignKey(RestaurantTable, on_delete=models.CASCADE, null=True, related_name='table')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
 
 
 class MergeTable(models.Model):

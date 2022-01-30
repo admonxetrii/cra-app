@@ -4,13 +4,19 @@ from rest_framework import generics, mixins, permissions, viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
+from accounts.models import CustomUser
 import datetime
+import pytz
+
+utc = pytz.timezone(zone="Asia/Kathmandu")
 
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
-from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation, RestaurantFloorLevel
+from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation, RestaurantFloorLevel, \
+    RestaurantTable
 from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, \
-    MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer, FloorLevelListBasedOnRestaurant
+    MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer, FloorLevelListBasedOnRestaurant, \
+    TableReservationDates, ReservationsByUserSerializer
 
 from algorithm.cosine_similarity import descriptionCosineSimilarity
 
@@ -241,3 +247,80 @@ class TableListBasedOnRestaurantAPIView(generics.ListAPIView):
             return RestaurantFloorLevel.objects.none()
         return RestaurantFloorLevel.objects.filter(restaurant_id=restaurant)
 
+
+class ReservedTableListByUserAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ReservationsByUserSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        user = self.kwargs.get("id", None)
+        if user is None:
+            return TableReservationDates.objects.none()
+
+        now = datetime.datetime.now()
+        current_datetime = utc.localize(now)
+        rsvp_obj = TableReservationDates.objects.filter(user__id=user)
+        for r in rsvp_obj:
+            rsvp_date = r.date
+            thirty_minute = datetime.timedelta(minutes=30)
+            print(current_datetime, rsvp_date)
+            rsvp_cancel_time = rsvp_date - thirty_minute
+            if current_datetime > rsvp_cancel_time:
+                r.delete()
+                print("Time exceeded for ", r.date)
+        get_rsvp_obj_final = TableReservationDates.objects.filter(user__id=user).order_by("date")
+        return get_rsvp_obj_final
+
+
+class ConfirmTableBookingAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def post(self, request, *arg, **kwargs):
+        try:
+            timestamp = request.data.get('date')
+            table_id = request.data.get('tableId')
+            user = request.data.get('username')
+            groupSize = request.data.get('groupSize')
+
+            print(timestamp, table_id, groupSize, user)
+
+            try:
+                user_obj = CustomUser.objects.get(username=user)
+                table_obj = RestaurantTable.objects.get(id=table_id)
+                date = datetime.datetime.fromtimestamp(timestamp / 1000)
+
+                print(date)
+
+                if table_obj is not None:
+                    reservationDate = TableReservationDates.objects.create(user=user_obj, table=table_obj, date=date,
+                                                                           groupSize=groupSize)
+                    reservationDate.save()
+                    return Response({"message": "Reservation Successful", "status": status.HTTP_200_OK})
+
+            except Exception as e:
+                print(e)
+                return Response({"message": e, "status": status.HTTP_404_NOT_FOUND})
+
+        except Exception as e:
+            print(e)
+            return Response({"message": "Something went wrong!!", "status": status.HTTP_400_BAD_REQUEST})
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            reservation_id = request.data.get('reservationId')
+            try:
+                rspv_obj = TableReservationDates.objects.get(id=reservation_id)
+                if rspv_obj is not None:
+                    rspv_obj.delete()
+                    return Response({"message": "Reservation has been cancelled.", "status": status.HTTP_200_OK,
+                                     "deletedId": reservation_id})
+                else:
+                    return Response({"message": "No reservations Found", "status": status.HTTP_404_NOT_FOUND})
+
+            except Exception as e:
+                return Response({"message": "No reservations Found", "status": status.HTTP_404_NOT_FOUND})
+
+        except Exception as e:
+            print(e)
+            return Response({"message": "No reservations Found", "status": status.HTTP_400_BAD_REQUEST})

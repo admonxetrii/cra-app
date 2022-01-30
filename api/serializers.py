@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from api.models import Restaurant, MenuCategory, Menu, RestaurantType, RestaurantTable, RestaurantFloorLevel, \
     TableReservationDates
+from accounts.api.serializers import UserProfileSerializer
 
 
 class RestaurantCategorySerializer(serializers.ModelSerializer):
@@ -91,11 +92,12 @@ class TableReservationDateSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'date',
+            'user'
         ]
 
 
 class TableSerializer(serializers.ModelSerializer):
-    reservationDate = TableReservationDateSerializer()
+    reservation_dates = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = RestaurantTable
@@ -106,9 +108,14 @@ class TableSerializer(serializers.ModelSerializer):
             'isOccupied',
             'occHrs',
             'occMin',
-            'reservationDate',
             'merged',
+            'reservation_dates'
         ]
+        read_only_fields = ['reservation_dates']
+
+    def get_reservation_dates(self, obj):
+        qs = obj.table.all()
+        return TableReservationDateSerializer(qs, many=True).data
 
 
 class MenuCategoryListBasedOnRestaurant(serializers.ModelSerializer):
@@ -144,3 +151,40 @@ class FloorLevelListBasedOnRestaurant(serializers.ModelSerializer):
     def get_tables(self, obj):
         qs = obj.floorLevel.all()
         return TableSerializer(qs, many=True).data
+
+
+class ReservedTablesFloorLevelSerializer(serializers.ModelSerializer):
+    restaurant = RestaurantSerializer()
+
+    class Meta:
+        model = RestaurantFloorLevel
+        fields = [
+            'id',
+            'floorName',
+            'restaurant'
+        ]
+
+
+class ReservedTablesSerializer(serializers.ModelSerializer):
+    floorLevel = ReservedTablesFloorLevelSerializer()
+
+    class Meta:
+        model = RestaurantTable
+        fields = [
+            'id',
+            'tableName',
+            'floorLevel'
+        ]
+
+
+class ReservationsByUserSerializer(serializers.ModelSerializer):
+    table = ReservedTablesSerializer()
+
+    class Meta:
+        model = TableReservationDates
+        fields = [
+            'id',
+            'date',
+            'groupSize',
+            'table'
+        ]

@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import RestaurantAPIView, RestaurantAPIDetailView, MenuCategoryAPIView, MenuCategoryDetailAPIView, \
     MenuAPIView, MenuDetailAPIView, MenuCategoryListBasedOnRestaurantAPIView, RestaurantCategoryAPIView, \
-    RestaurantBasedOnTypesAPIView, CheckSimilarityOfRestaurants,GetSimilarRestaurants, TableListBasedOnRestaurantAPIView
+    RestaurantBasedOnTypesAPIView, CheckSimilarityOfRestaurants, GetSimilarRestaurants, \
+    TableListBasedOnRestaurantAPIView, ConfirmTableBookingAPIView, ReservedTableListByUserAPIView
 
 from django.conf.urls.static import static
 from crabackend import settings
@@ -17,7 +18,9 @@ urlpatterns = [
                   path('menu/<int:id>', MenuDetailAPIView.as_view()),
                   path('restaurant/<int:id>/menuList', MenuCategoryListBasedOnRestaurantAPIView.as_view()),
                   path('restaurant/<int:id>/tableList', TableListBasedOnRestaurantAPIView.as_view()),
+                  path('restaurant-booking/', ConfirmTableBookingAPIView.as_view()),
                   path('restaurant-similarity/', CheckSimilarityOfRestaurants.as_view()),
                   path('restaurant-similarities/<int:id>', GetSimilarRestaurants.as_view()),
+                  path('my-reservations/<int:id>', ReservedTableListByUserAPIView.as_view()),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
