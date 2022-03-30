@@ -128,6 +128,12 @@ class Menu(models.Model):
     class Meta:
         db_table = "MENU"
 
+class Favourites(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+
+class IsFavourite(models.Model):
+    is_favourite = models.BooleanField()
 
 class similarityCalculation(models.Model):
     restaurantA = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantA')
@@ -166,6 +172,7 @@ class TableReservationDates(models.Model):
     groupSize = models.IntegerField(null=True, blank=True)
     table = models.ForeignKey(RestaurantTable, on_delete=models.CASCADE, null=True, related_name='table')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    confirmation =models.BooleanField(default=0)
 
 
 class MergeTable(models.Model):
@@ -174,5 +181,6 @@ class MergeTable(models.Model):
 
     class Meta:
         db_table = "TABLE_MERGE"
+
 
 

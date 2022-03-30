@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from api.models import Restaurant, MenuCategory, Menu, RestaurantType, RestaurantTable, RestaurantFloorLevel, \
-    TableReservationDates
+    TableReservationDates, similarityCalculation, IsFavourite
 from accounts.api.serializers import UserProfileSerializer
 
 
@@ -40,7 +40,6 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'isClosedTemporarily',
             'addedDate',
             'modifiedDate',
-            'modifiedBy',
         ]
         read_only_fields = ['modifiedBy']
 
@@ -52,6 +51,16 @@ class RestaurantSerializer(serializers.ModelSerializer):
         if name is None and image is None:
             raise serializers.ValidationError("Name or image is required.")
         return data
+
+
+class SimilaritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = similarityCalculation
+        fields = [
+            'similarityPercent',
+            'restaurantA',
+            'restaurantB'
+        ]
 
 
 class MenuCategorySerializer(serializers.ModelSerializer):
@@ -116,6 +125,14 @@ class TableSerializer(serializers.ModelSerializer):
     def get_reservation_dates(self, obj):
         qs = obj.table.all()
         return TableReservationDateSerializer(qs, many=True).data
+
+
+class IsFavouriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IsFavourite
+        fields = [
+            'is_favourite'
+        ]
 
 
 class MenuCategoryListBasedOnRestaurant(serializers.ModelSerializer):
@@ -186,5 +203,6 @@ class ReservationsByUserSerializer(serializers.ModelSerializer):
             'id',
             'date',
             'groupSize',
-            'table'
+            'confirmation',
+            'table',
         ]

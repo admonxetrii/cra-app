@@ -13,10 +13,10 @@ utc = pytz.timezone(zone="Asia/Kathmandu")
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
 from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation, RestaurantFloorLevel, \
-    RestaurantTable
+    RestaurantTable, Favourites, IsFavourite
 from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, \
     MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer, FloorLevelListBasedOnRestaurant, \
-    TableReservationDates, ReservationsByUserSerializer
+    TableReservationDates, ReservationsByUserSerializer, SimilaritySerializer, IsFavouriteSerializer
 
 from algorithm.cosine_similarity import descriptionCosineSimilarity
 
@@ -28,10 +28,10 @@ class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
     def get_queryset(self):
         request = self.request
-        qs = Restaurant.objects.all()
+        qs = Restaurant.objects.all().order_by('?')[:10]
         query = request.GET.get('q')
         if query is not None:
-            qs = qs.filter(name__icontains=query)
+            qs = Restaurant.objects.filter(name__icontains=query)
         return qs
 
     def post(self, request, *args, **kwargs):
@@ -216,6 +216,24 @@ class CheckSimilarityOfRestaurants(APIView):
             return Response({"message": "update failed", "status": status.HTTP_417_EXPECTATION_FAILED})
 
 
+class GetSimilarityPercentageSerializer(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SimilaritySerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["restaurant_id"] = self.kwargs["id"]
+
+    def get_queryset(self, *args, **kwargs):
+        restaurantId = self.kwargs.get("id", None)
+        if restaurantId is None:
+            return similarityCalculation.objects.none()
+        similarities = similarityCalculation.objects.filter(
+            Q(restaurantA__id__iexact=restaurantId) | Q(restaurantB__id__iexact=restaurantId)).order_by(
+            '-similarityPercent')[:10]
+        return similarities
+
+
 class GetSimilarRestaurants(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantSerializer
@@ -228,13 +246,13 @@ class GetSimilarRestaurants(generics.ListAPIView):
             Q(restaurantA__id__iexact=restaurantId) | Q(restaurantB__id__iexact=restaurantId)).order_by(
             '-similarityPercent')[:10]
 
-        id_set = []
+        restaurants = []
         for s in similarities:
             if s.restaurantA.id == restaurantId:
-                id_set.append(s.restaurantB.id)
+                restaurants.extend(list(Restaurant.objects.filter(id=s.restaurantB.id)))
             elif s.restaurantB.id == restaurantId:
-                id_set.append(s.restaurantA.id)
-        return Restaurant.objects.filter(id__in=id_set)
+                restaurants.extend(list(Restaurant.objects.filter(id=s.restaurantA.id)))
+        return restaurants
 
 
 class TableListBasedOnRestaurantAPIView(generics.ListAPIView):
@@ -324,3 +342,68 @@ class ConfirmTableBookingAPIView(APIView):
         except Exception as e:
             print(e)
             return Response({"message": "No reservations Found", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class FavouriteRestaurant(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RestaurantSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        username = self.kwargs.get("username", None)
+        if username is None:
+            return Restaurant.objects.none()
+        favourites = Favourites.objects.filter(user__username=username)
+
+        restaurants = []
+        for f in favourites:
+            restaurants.extend(list(Restaurant.objects.filter(id=f.restaurant.id)))
+        return restaurants
+
+    def post(self, request, *args, **kwargs):
+        restaurant_id = request.data.get("restaurant")
+        username = request.data.get("username")
+        try:
+            restaurant = Restaurant.objects.get(id=restaurant_id)
+            user = CustomUser.objects.get(username=username)
+            favourite = Favourites.objects.create(user=user, restaurant=restaurant)
+            favourite.save()
+            return Response({"message": "Favourite Added Successfully", "status": status.HTTP_200_OK})
+        except Exception as e:
+            print(e)
+            return Response({"message": "No Favourites Created", "status": status.HTTP_400_BAD_REQUEST})
+
+    def patch(self, request, *args, **kwargs):
+        restaurant_id = request.data.get("restaurant")
+        username = request.data.get("username")
+        try:
+            restaurant = Restaurant.objects.get(id=restaurant_id)
+            user = CustomUser.objects.get(username=username)
+            favourite = Favourites.objects.get(user=user, restaurant=restaurant)
+            favourite.delete()
+            return Response({"message": "Favourite Removed Successfully", "status": status.HTTP_200_OK})
+        except Exception as e:
+            print(e)
+            return Response({"message": "No Favourite found", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class IsFavouriteAPI(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = IsFavouriteSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        username = self.request.GET.get('username')
+        restaurant = self.request.GET.get('restaurant')
+        print(username, restaurant)
+        if restaurant is None:
+            print("yah aayo")
+            return Restaurant.objects.none()
+        try:
+            restaurantObj = Restaurant.objects.get(id=restaurant)
+            favourites = Favourites.objects.filter(user__username=username, restaurant=restaurantObj)
+            if favourites.exists():
+                return IsFavourite.objects.filter(id=1)
+            else:
+                return IsFavourite.objects.filter(id=2)
+        except Exception as e:
+            print(e)
+            return Response({"message": "Not Favourite ", "status": status.HTTP_400_BAD_REQUEST})
