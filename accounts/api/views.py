@@ -54,19 +54,30 @@ class CustomUserCreate(APIView):
         try:
             print(request.data)
             reg_serializer = UserRegisterSerializer(data=request.data)
-
             if not reg_serializer.is_valid():
-                return Response({"error": reg_serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
+                print(reg_serializer.errors)
+                if reg_serializer.errors.get('username') is not None:
+                    return Response(
+                        {"error": "Username already exists", "status": status.HTTP_406_NOT_ACCEPTABLE})
+                elif reg_serializer.errors.get('email') is not None:
+                    return Response(
+                        {"error": "Email already exists", "status": status.HTTP_406_NOT_ACCEPTABLE})
+                elif reg_serializer.errors.get('phone_number') is not None:
+                    return Response(
+                        {"error": "Phone number already exists", "status": status.HTTP_406_NOT_ACCEPTABLE})
+                else:
+                    return Response({"error": reg_serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
 
             newuser = reg_serializer.save()
             if newuser:
                 # send_email_token(newuser)
+                print("success")
                 return Response({"status": status.HTTP_201_CREATED,
                                  "message": "Successfully Registered.", "username": newuser.username})
             return Response({"message": "Cannot create user!!", "status": status.HTTP_400_BAD_REQUEST})
         except Exception as e:
             print(e)
-            return Response({"message": "something went wrong", "status": status.HTTP_400_BAD_REQUEST})
+            return Response({"message": "Something went wrong", "status": status.HTTP_400_BAD_REQUEST})
 
 
 class VerifyOtp(APIView):
@@ -93,9 +104,10 @@ class VerifyOtp(APIView):
     def patch(self, request):
         try:
             data = request.data
-            user_obj = CustomUser.objects.get(username=data.get('username'))
 
-            if not user_obj.exists():
+            try:
+                user_obj = CustomUser.objects.get(username=data.get('username'))
+            except Exception as e:
                 return Response({"message": "No user found", "status": status.HTTP_404_NOT_FOUND})
 
             otpStatus, time = send_otp_to_email(data.get('email'), user_obj)

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'api',
+    'cart',
     'accounts',
 ]
 
@@ -100,7 +101,7 @@ DATABASES = {
         'USER': 'hanumanc_test',
         'PASSWORD': 'Uw^8?0s35QYE',
         'HOST': 'localhost',
-        'PORT': '3306',
+        'PORT': '3307',
     }
 }
 
@@ -127,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
@@ -158,12 +159,3 @@ EMAIL_HOST_USER = 'no-reply@nishamwagle.com.np'
 EMAIL_HOST_PASSWORD = 'fqE4L&FO_)1f'
 
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
