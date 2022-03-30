@@ -345,7 +345,7 @@ class ConfirmTableBookingAPIView(APIView):
 
 
 class FavouriteRestaurant(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = RestaurantSerializer
 
     def get_queryset(self, *args, **kwargs):
@@ -359,9 +359,14 @@ class FavouriteRestaurant(generics.ListAPIView):
             restaurants.extend(list(Restaurant.objects.filter(id=f.restaurant.id)))
         return restaurants
 
+
+class EditFavourite(APIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RestaurantSerializer
+
     def post(self, request, *args, **kwargs):
-        restaurant_id = request.data.get("restaurant")
-        username = request.data.get("username")
+        restaurant_id = request.data.get('restaurant')
+        username = request.data.get('username')
         try:
             restaurant = Restaurant.objects.get(id=restaurant_id)
             user = CustomUser.objects.get(username=username)
@@ -373,14 +378,15 @@ class FavouriteRestaurant(generics.ListAPIView):
             return Response({"message": "No Favourites Created", "status": status.HTTP_400_BAD_REQUEST})
 
     def patch(self, request, *args, **kwargs):
-        restaurant_id = request.data.get("restaurant")
-        username = request.data.get("username")
+        restaurant_id = request.data.get('restaurant')
+        username = request.data.get('username')
         try:
             restaurant = Restaurant.objects.get(id=restaurant_id)
             user = CustomUser.objects.get(username=username)
             favourite = Favourites.objects.get(user=user, restaurant=restaurant)
             favourite.delete()
-            return Response({"message": "Favourite Removed Successfully", "status": status.HTTP_200_OK})
+            return Response(
+                {"message": "Favourite Removed Successfully", "deletedId": restaurant_id, "status": status.HTTP_200_OK})
         except Exception as e:
             print(e)
             return Response({"message": "No Favourite found", "status": status.HTTP_400_BAD_REQUEST})

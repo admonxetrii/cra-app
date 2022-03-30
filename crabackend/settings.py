@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-$4o*84m$ny7*n-_6t%xvups59kg@8qi&0m4*!9lpt9vz1diqa+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.94', 'localhost', '127.0.0.1', '192.168.0.108', '192.168.150.157', '192.168.254.9', '192.168.43.152']
+ALLOWED_HOSTS = ['192.168.1.94', 'localhost', '127.0.0.1', '192.168.0.108', '192.168.150.157', '192.168.254.9',
+                 '192.168.254.6']
 
 # Application definition
 
@@ -98,9 +99,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cra_db',
         'USER': 'root',
-        'PASSWORD': '231Bac564#',
+        'PASSWORD': 'nouseofit',
         'HOST': 'localhost',
-        'PORT': '3306',
+        'PORT': '3307',
     }
 }
 
@@ -156,7 +157,6 @@ EMAIL_USE_TLS = False
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'no-reply@nishamwagle.com.np'
 EMAIL_HOST_PASSWORD = 'fqE4L&FO_)1f'
-
 
 CACHES = {
     "default": {
