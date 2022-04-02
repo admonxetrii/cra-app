@@ -292,14 +292,24 @@ class ReservedTableListByUserAPIView(generics.ListAPIView):
         current_datetime = utc.localize(now)
         rsvp_obj = TableReservationDates.objects.filter(user__id=user)
         for r in rsvp_obj:
-            rsvp_date = r.date
-            thirty_minute = datetime.timedelta(minutes=30)
-            print(current_datetime, rsvp_date)
-            rsvp_cancel_time = rsvp_date - thirty_minute
-            if current_datetime > rsvp_cancel_time:
-                r.delete()
-                print("Time exceeded for ", r.date)
-        get_rsvp_obj_final = TableReservationDates.objects.filter(user__id=user).order_by("date")
+            rsvp_date = r.startDate
+            if r.confirmation:
+                fourty_five_min = datetime.timedelta(minutes=45)
+                print(current_datetime, fourty_five_min)
+                rsvp_cancel_time = rsvp_date + fourty_five_min
+                if current_datetime > rsvp_cancel_time:
+                    r.cancelled = True
+                    r.save()
+                    print("User didn't arrived so cancelled")
+            else:
+                thirty_minute = datetime.timedelta(minutes=30)
+                print(current_datetime, rsvp_date)
+                rsvp_cancel_time = rsvp_date - thirty_minute
+                if current_datetime > rsvp_cancel_time:
+                    r.cancelled = True
+                    r.save()
+                    print("Not Confirmed")
+        get_rsvp_obj_final = TableReservationDates.objects.filter(user__id=user, cancelled=False).order_by("startDate")
         return get_rsvp_obj_final
 
 
@@ -309,22 +319,25 @@ class ConfirmTableBookingAPIView(APIView):
 
     def post(self, request, *arg, **kwargs):
         try:
-            timestamp = request.data.get('date')
+            start = request.data.get('startDate')
+            end = request.data.get('endDate')
             table_id = request.data.get('tableId')
             user = request.data.get('username')
             groupSize = request.data.get('groupSize')
 
-            print(timestamp, table_id, groupSize, user)
+            print(start, end, table_id, groupSize, user)
 
             try:
                 user_obj = CustomUser.objects.get(username=user)
                 table_obj = RestaurantTable.objects.get(id=table_id)
-                date = datetime.datetime.fromtimestamp(timestamp / 1000)
+                startDate = datetime.datetime.fromtimestamp(start / 1000)
+                endDate = datetime.datetime.fromtimestamp(end / 1000)
 
-                print(date)
+                print(startDate, endDate)
 
                 if table_obj is not None:
-                    reservationDate = TableReservationDates.objects.create(user=user_obj, table=table_obj, date=date,
+                    reservationDate = TableReservationDates.objects.create(user=user_obj, table=table_obj,
+                                                                           startDate=startDate, endDate=endDate,
                                                                            groupSize=groupSize)
                     reservationDate.save()
                     return Response({"message": "Reservation Successful", "status": status.HTTP_200_OK})
@@ -343,7 +356,8 @@ class ConfirmTableBookingAPIView(APIView):
             try:
                 rspv_obj = TableReservationDates.objects.get(id=reservation_id)
                 if rspv_obj is not None:
-                    rspv_obj.delete()
+                    rspv_obj.cancelled = True
+                    rspv_obj.save()
                     return Response({"message": "Reservation has been cancelled.", "status": status.HTTP_200_OK,
                                      "deletedId": reservation_id})
                 else:

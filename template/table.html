@@ -41,171 +41,157 @@
 {% endblock %}
 {% block 'body' %}
     <div class="container-fluid">
-        {% include 'component/message.html' %}
-        <div class="d-sm-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-dark font-weight-bold mb-0">Tables</h1>
+    {% include 'component/message.html' %}
+    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-dark font-weight-bold mb-0">Tables</h1>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="text-dark font-weight-bold h3 mb-0">Total Tables <br> <span id="ttbl"
+                                                                                            style="color: #2e59d9"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-dark font-weight-bold h3 mb-0">Available Tables <br> <span id="atbl"
+                                                                                                style="color: #1cc88a"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-dark font-weight-bold h3 mb-0">Occupied Tables <br><span id="otbl"
+                                                                                              style="color: #e74a3b"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-dark font-weight-bold h3 mb-0">Reserved Tables <br> <span id="rtbl"
+                                                                                               class="text-warning"></span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="text-dark font-weight-bold h3 mb-0">Total Tables <br> <span id="ttbl"
-                                                                                                style="color: #2e59d9"></span>
-                        </div>
+    </div>
+    <p><br><br></p>
+    <hr>
+    <p><br><br></p>
+    <script>
+        var ttbl = 0;
+        var atbl = 0;
+        var otbl = 0;
+        var rtbl = 0;
+    </script>
+    {% for f in floor %}
+        <div class="text-dark font-weight-bold h3 col-md-3 col-xl-2 mb-2">
+            {{ f.floorName }} <br>
+        </div>
+        <div class="row">
+        {% for t in table %}
+            {% if t.floorLevel.id == f.id %}
+                <script> ttbl = ttbl + 1;</script>
+                <div class="col-md-3 col-xl-2 mb-2">
+                {% if t.isOccupied == 1 %}
+                    <script>otbl = otbl + 1;</script>
+                    <div class="card">
+                    <div class="card-header bg-danger">
+                        <h4 class="m-b-0 text-white"></h4></div>
+                {% else %}
+                    <script>atbl += 1;</script>
+                    <div class="card border-success">
+                    <div class="card-header bg-success">
+                        <h4 class="m-b-0 text-white"></h4></div>
+                {% endif %}
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col mr-2">
+                        <!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->
+                        <a href="#" class="col-md-6 col-xl-3 mb-4">
+                            {#                                <a href="{% url 'tableorder' t.id %}" class="col-md-6 col-xl-3 mb-4" >#}
+                            <div class="text-dark font-weight-bold h2 mb-0">
+                                <span>{{ t.tableName }} </span>
+                            </div>
+                        </a>
+                        {% if request.user.is_superuser %}
+                            <div class=" h6 mb-0">
+                                <button class="btn btn-info btn-sm" data-toggle="modal"
+                                        data-target="#editTable{{ t.id }}"><i
+                                        class="fa fa-edit"></i>
+                                    Edit
+                                </button>
+                                |
+                                {#                                    <a href="{% url 'deleteTable' t.id %}"><button class="btn btn-danger btn-sm" onclick="return confirm('Are you sure want to delete this category?');"><i class="fa fa-trash"></i> Delete</button></a>#}
+                                <a href="#">
+                                    <button class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Are you sure want to delete this category?');">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="col-md-3">
-                        <div class="text-dark font-weight-bold h3 mb-0">Available Tables <br> <span id="atbl"
-                                                                                                    style="color: #1cc88a"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-dark font-weight-bold h3 mb-0">Occupied Tables <br><span id="otbl"
-                                                                                                  style="color: #e74a3b"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-dark font-weight-bold h3 mb-0">Reserved Tables <br> <span id="rtbl"
-                                                                                                   class="text-warning"></span>
+                    {% if t.isOccupied == 1 %}
+
+                        <button class="btn btn-outline-danger btn-sm" data-toggle="modal"
+                                data-target="#change{{ t.id }}"><i class="fa fa-edit"></i> Change
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+            </div>
+            {% endif %}
+            <script>rtbl = rtbl + 1;</script>
+        {% endfor %}
+
+    {#{% for mt in merge %}#}
+    {#    <script>otbl=otbl+2;</script>#}
+    {#    <div class="col-md-3 col-xl-2 ">#}
+    {##}
+    {#            <div class="card">#}
+    {#                <div class="card-header bg-danger">#}
+    {#                    <h4 class="m-b-0 text-white"></h4></div>#}
+    {#                <div class="card-body" >#}
+    {#                    <div class="row align-items-center no-gutters">#}
+    {#                        <div class="col mr-2">#}
+    {#<!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->#}
+    {#                            <a href="{% url 'tableorder' mt.table1.id %}" class="col-md-6 col-xl-3 mb-4" >#}
+    {#                                 <div class="text-dark font-weight-bold h2 mb-0"><span>{{mt.table1.title}}, {{mt.table2.title}} </span></div>#}
+    {#                            </a>#}
+    {#                        </div>#}
+    {#                        <div class=" h6 mb-0">#}
+    {#                            <a href="{% url 'unmerge_table' mt.id %}"><button class="btn btn-info btn-sm" onclick="return confirm('Are you sure?')"><i class="fa fa-edit"></i> Unmerge</button></a>#}
+    {#                        </div>#}
+    {#                    </div>#}
+    {#                </div>#}
+    {#            </div>#}
+    {##}
+    {#    </div>#}
+    {#{% endfor %}#}
+    <script>
+        document.getElementById('ttbl').innerHTML = ttbl;
+        document.getElementById('otbl').innerHTML = otbl;
+        document.getElementById('atbl').innerHTML = atbl;
+        document.getElementById('rtbl').innerHTML = rtbl;
+    </script>
+    {% if request.user.is_superuser %}
+        <div class="col-md-3 col-xl-2 mb-2">
+            <div class="card shadow border-left-info py-2">
+                <div class="card-body" data-toggle="modal" data-target="#addTable">
+                    <div class="row align-items-center no-gutters">
+                        <div class="col mr-2">
+                            <a href="#" class="col-md-6 col-xl-3 mb-4">
+                                <div class="text-dark font-weight-bold h3 mb-0">
+                                    <span><i class="fa fa-table"></i> Add Table</span>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <p><br><br></p>
-        <hr>
-        <p><br><br></p>
-        <div class="row">
-            <script> var ttbl = 0;
-            var atbl = 0;
-            var otbl = 0;
-            var rtbl = 0;</script>
-            {% for t in table %}
-                <script> ttbl = ttbl + 1;</script>
-                <div class="col-md-3 col-xl-2 mb-2">
-                    {% if t.occupied == 1 %}
-                        <script>otbl = otbl + 1;</script>
-                        <div class="card">
-                            <div class="card-header bg-danger">
-                                <h4 class="m-b-0 text-white"></h4></div>
-                            <div class="card-body">
-                                <div class="row align-items-center no-gutters">
-                                    <div class="col mr-2">
-                                        <!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->
-                                        <a href="#" class="col-md-6 col-xl-3 mb-4">
-                                            {#                                <a href="{% url 'tableorder' t.id %}" class="col-md-6 col-xl-3 mb-4" >#}
-                                            <div class="text-dark font-weight-bold h2 mb-0"><span>{{ t.tableName }} </span>
-                                            </div>
-                                        </a>
-                                        {% if request.user.is_superuser %}
-                                            <div class=" h6 mb-0">
-                                                <button class="btn btn-info btn-sm" data-toggle="modal"
-                                                        data-target="#editTable{{ t.id }}"><i class="fa fa-edit"></i>
-                                                    Edit
-                                                </button>
-                                                |
-                                                {#                                    <a href="{% url 'deleteTable' t.id %}"><button class="btn btn-danger btn-sm" onclick="return confirm('Are you sure want to delete this category?');"><i class="fa fa-trash"></i> Delete</button></a>#}
-                                                <a href="#">
-                                                    <button class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Are you sure want to delete this category?');">
-                                                        <i class="fa fa-trash"></i> Delete
-                                                    </button>
-                                                </a>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    <button class="btn btn-outline-danger btn-sm" data-toggle="modal"
-                                            data-target="#change{{ t.id }}"><i class="fa fa-edit"></i> Change
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    {% else %}
-                        <script>atbl += 1;</script>
-                        <div class="card border-success">
-                            <div class="card-header bg-success">
-                                <h4 class="m-b-0 text-white"></h4></div>
-                            <div class="card-body">
-                                <div class="row align-items-center no-gutters">
-                                    <div class="col mr-2">
-                                        <!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->
-                                        {#                                        <a href="{% url 'tableorder' t.id %}" class="col-md-6 col-xl-3 mb-4" disabled="true">#}
-                                        <a href="#" class="col-md-6 col-xl-3 mb-4" disabled="true">
-                                            <div class="text-dark font-weight-bold h2 mb-0"><span>{{ t.title }}</span>
-                                            </div>
-                                        </a>
-                                        {% if request.user.is_superuser %}
-                                            <div class=" h6 mb-0">
-                                                <button class="btn btn-info btn-sm" data-toggle="modal"
-                                                        data-target="#editTable{{ t.id }}"><i class="fa fa-edit"></i>
-                                                    Edit
-                                                </button>
-                                                |
-                                                {#                                            <a href="{% url 'deleteTable' t.id %}"><button class="btn btn-danger btn-sm" onclick="return confirm('Are you sure want to delete this category?');"><i class="fa fa-trash"></i> Delete</button></a>#}
-                                                <a href="#">
-                                                    <button class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Are you sure want to delete this category?');">
-                                                        <i class="fa fa-trash"></i> Delete
-                                                    </button>
-                                                </a>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-                <script>rtbl = rtbl + 1;</script>
-            {% endfor %}
-            {#{% for mt in merge %}#}
-            {#    <script>otbl=otbl+2;</script>#}
-            {#    <div class="col-md-3 col-xl-2 ">#}
-            {##}
-            {#            <div class="card">#}
-            {#                <div class="card-header bg-danger">#}
-            {#                    <h4 class="m-b-0 text-white"></h4></div>#}
-            {#                <div class="card-body" >#}
-            {#                    <div class="row align-items-center no-gutters">#}
-            {#                        <div class="col mr-2">#}
-            {#<!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->#}
-            {#                            <a href="{% url 'tableorder' mt.table1.id %}" class="col-md-6 col-xl-3 mb-4" >#}
-            {#                                 <div class="text-dark font-weight-bold h2 mb-0"><span>{{mt.table1.title}}, {{mt.table2.title}} </span></div>#}
-            {#                            </a>#}
-            {#                        </div>#}
-            {#                        <div class=" h6 mb-0">#}
-            {#                            <a href="{% url 'unmerge_table' mt.id %}"><button class="btn btn-info btn-sm" onclick="return confirm('Are you sure?')"><i class="fa fa-edit"></i> Unmerge</button></a>#}
-            {#                        </div>#}
-            {#                    </div>#}
-            {#                </div>#}
-            {#            </div>#}
-            {##}
-            {#    </div>#}
-            {#{% endfor %}#}
-            <script>
-                document.getElementById('ttbl').innerHTML = ttbl;
-                document.getElementById('otbl').innerHTML = otbl;
-                document.getElementById('atbl').innerHTML = atbl;
-                document.getElementById('rtbl').innerHTML = rtbl;
-            </script>
-            {% if request.user.is_superuser %}
-                <div class="col-md-3 col-xl-2 mb-2">
-                    <div class="card shadow border-left-info py-2">
-                        <div class="card-body" data-toggle="modal" data-target="#addTable">
-                            <div class="row align-items-center no-gutters">
-                                <div class="col mr-2">
-                                    <a href="#" class="col-md-6 col-xl-3 mb-4">
-                                        <div class="text-dark font-weight-bold h3 mb-0">
-                                            <span><i class="fa fa-table"></i> Add Table</span>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
+    {% endif %}
     </div>
+    {% endfor %}
+</div>
     <hr>
     <div class="container-fluid">
         {% if request.user.is_staff %}

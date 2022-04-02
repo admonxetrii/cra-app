@@ -184,6 +184,9 @@
                         <li> <a class="waves-effect waves-dark {% if request.url == '/table/' %} active {% endif %} "
                                 href="{% url 'table' %}" aria-expanded="false"><i class="fa fa-table"></i><span
                                 class="hide-menu"></span>Tables</a></li>
+                        <li> <a class="waves-effect waves-dark {% if request.url == '/reservations/' %} active {% endif %} "
+                                href="{% url 'reservations' %}" aria-expanded="false"><i class="fa fa-clipboard-list"></i><span
+                                class="hide-menu"></span>Reservations</a></li>
                         {% if request.user.is_staff %}
                             <li> <a class="waves-effect waves-dark {% if request.url == '/report/' %} active {% endif %} "
                                     href="#" aria-expanded="false"><i class="fa fa-dollar-sign"></i><span

@@ -25,7 +25,9 @@ class UserAdminConfig(UserAdmin):
                 'otp',
                 'is_active',
                 'is_staff',
-                'is_superuser'
+                'is_superuser',
+                'is_restaurant_representative',
+                'is_customer',
             )
         }),
         ('Personal', {
@@ -56,7 +58,9 @@ class UserAdminConfig(UserAdmin):
             'fields': (
                 'is_active',
                 'is_staff',
-                'is_superuser'
+                'is_superuser',
+                'is_restaurant_representative',
+                'is_customer',
             )
         }),
         ('Personal', {

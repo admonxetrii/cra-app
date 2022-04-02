@@ -3,16 +3,29 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+import datetime
+import pytz
 
-# Global Variables
+# Models
 from accounts.models import UserRestaurant
-from api.models import Restaurant, RestaurantTable
+from api.models import Restaurant, RestaurantTable, RestaurantFloorLevel, TableReservationDates
 
-restaurant_obj = None
+# Global vars
+restaurant_obj_id = None
 User = get_user_model()
+utc = pytz.timezone(zone="Asia/Kathmandu")
 
 
 # Create your views here.
+def restaurant_obj(request):
+    global restaurant_obj_id
+    if restaurant_obj_id is not None:
+        return restaurant_obj_id
+    user_restaurant_id = request.user.userrestaurant.id
+    ur = UserRestaurant.objects.get(id=user_restaurant_id)
+    restaurant_obj_id = Restaurant.objects.get(id=ur.restaurant.id)
+    return restaurant_obj_id
+
 
 def signin(request):
     print(request.user)
@@ -26,10 +39,6 @@ def signin(request):
         user = authenticate(username=u, password=p)
         if user is not None:
             try:
-                user_restaurant_id = user.userrestaurant.id
-                ur = UserRestaurant.objects.get(id=user_restaurant_id)
-                global restaurant_obj
-                restaurant_obj = Restaurant.objects.get(id=ur.restaurant.id)
                 if user.is_restaurant_representative:
                     print(user.userrestaurant)
                     login(request, user)
@@ -51,16 +60,50 @@ def signout(request):
 
 @login_required(login_url='signin')
 def dashboard(request):
-    print(restaurant_obj)
+    print(restaurant_obj(request))
     return render(request, 'dashboard.html')
 
 
+@login_required(login_url='signin')
 def tables(request):
-    data1 = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant_obj)
+    data1 = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant_obj(request))
+    data2 = RestaurantFloorLevel.objects.filter(restaurant=restaurant_obj(request))
     context = {
         'table': data1,
+        'floor': data2
     }
     return render(request, 'table.html', context)
+
+
+@login_required(login_url='signin')
+def reservations(request):
+    print(restaurant_obj(request))
+    res = TableReservationDates.objects.filter(table__floorLevel__restaurant=restaurant_obj(request)).order_by('addedTime')
+    print(res)
+    now = datetime.datetime.now()
+    current_datetime = utc.localize(now)
+    new_reservations = []
+    confirmed_reservations = []
+    old_reservations = []
+    try:
+        for r in res:
+            print(r.date)
+            if r.date > current_datetime:
+                if r.confirmation:
+                    confirmed_reservations.append(r)
+                else:
+                    new_reservations.append(r)
+            else:
+                old_reservations.append(r)
+    except Exception as e:
+        print(e)
+    context = {
+        'new': new_reservations,
+        'old': old_reservations,
+        'confirmed': confirmed_reservations
+    }
+
+    return render(request, 'reservations.html', context)
 
 
 def signup(request):

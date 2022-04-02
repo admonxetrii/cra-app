@@ -30,7 +30,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_staff',
             'is_customer',
             'is_premium_customer',
-            'is_waiter',
+            'is_restaurant_representative',
             'date_joined'
         ]
 

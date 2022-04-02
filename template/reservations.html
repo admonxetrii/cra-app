@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+{% block 'title' %} Tables {% endblock %}
+{% load static %}
+{% block 'script' %}
+
+
+{% endblock %}
+{% block 'body' %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">New Reservations</h4>
+                    <h6 class="card-subtitle">Data table example</h6>
+                    <div class="table-responsive m-t-40">
+                        <table id="myTable" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Group Size</th>
+                                <th>Reservation Time</th>
+                                <th>Reserved By</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for n in new %}
+                                <tr>
+                                    <td><span class="font-weight-bold">{{ n.table.tableName }}</span></td>
+                                    <td>{{ n.groupSize }}</td>
+                                    <td>{{ n.date }}</td>
+                                    <td>{{ n.user.first_name }} {{ n.user.last_name }}</td>
+                                    <td>{{ n.user.phone_number }}</td>
+                                    <td><a href="javascript:void(0)"
+                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Apporve</a>
+                                        <a href="javascript:void(0)"
+                                           class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

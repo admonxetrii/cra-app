@@ -100,8 +100,12 @@ class TableReservationDateSerializer(serializers.ModelSerializer):
         model = TableReservationDates
         fields = [
             'id',
-            'date',
-            'user'
+            'startDate',
+            'endDate',
+            'user',
+            'cancelled',
+            'addedTime',
+            'confirmation'
         ]
 
 
@@ -201,8 +205,11 @@ class ReservationsByUserSerializer(serializers.ModelSerializer):
         model = TableReservationDates
         fields = [
             'id',
-            'date',
+            'startDate',
+            'endDate',
             'groupSize',
             'confirmation',
             'table',
+            'addedTime',
+            'cancelled',
         ]

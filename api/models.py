@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from accounts.models import CustomUser
 
+
 # my custom methods
 
 
@@ -127,12 +128,15 @@ class Menu(models.Model):
     class Meta:
         db_table = "MENU"
 
+
 class Favourites(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
 
+
 class IsFavourite(models.Model):
     is_favourite = models.BooleanField()
+
 
 class similarityCalculation(models.Model):
     restaurantA = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantA')
@@ -158,7 +162,8 @@ class RestaurantTable(models.Model):
     occHrs = models.IntegerField(null=True, blank=True)
     occMin = models.IntegerField(null=True, blank=True)
     merged = models.IntegerField(null=True, blank=True)
-    floorLevel = models.ForeignKey(RestaurantFloorLevel, on_delete=models.CASCADE, related_name='floorLevel', null=True, blank=True)
+    floorLevel = models.ForeignKey(RestaurantFloorLevel, on_delete=models.CASCADE, related_name='floorLevel', null=True,
+                                   blank=True)
 
     class Meta:
         db_table = "TABLE_MASTER"
@@ -166,12 +171,19 @@ class RestaurantTable(models.Model):
     def __str__(self):
         return self.tableName
 
+
 class TableReservationDates(models.Model):
-    date = models.DateTimeField(null=True, blank=True)
+    startDate = models.DateTimeField(null=True, blank=True)
+    endDate = models.DateTimeField(null=True, blank=True)
     groupSize = models.IntegerField(null=True, blank=True)
     table = models.ForeignKey(RestaurantTable, on_delete=models.CASCADE, null=True, related_name='table')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
-    confirmation =models.BooleanField(default=0)
+    confirmation = models.BooleanField(default=0)
+    addedTime = models.DateTimeField(auto_now=True)
+    cancelled = models.BooleanField(default=0)
+
+    def __str__(self):
+        return self.table.tableName + " " + str(self.date)
 
 
 class MergeTable(models.Model):
@@ -180,6 +192,3 @@ class MergeTable(models.Model):
 
     class Meta:
         db_table = "TABLE_MERGE"
-
-
-
