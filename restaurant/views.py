@@ -1,9 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 # Global Variables
+from accounts.models import UserRestaurant
+from api.models import Restaurant, RestaurantTable
+
+restaurant_obj = None
 User = get_user_model()
 
 
@@ -20,15 +25,43 @@ def signin(request):
         p = request.POST['password']
         user = authenticate(username=u, password=p)
         if user is not None:
-            if user.is_restaurant_representative:
-                login(request, user)
-                return redirect('dashboard')
-            messages.add_message(request, messages.ERROR,
-                                 "You're not authorized !!!")
+            try:
+                user_restaurant_id = user.userrestaurant.id
+                ur = UserRestaurant.objects.get(id=user_restaurant_id)
+                global restaurant_obj
+                restaurant_obj = Restaurant.objects.get(id=ur.restaurant.id)
+                if user.is_restaurant_representative:
+                    print(user.userrestaurant)
+                    login(request, user)
+                    return redirect('dashboard')
+            except Exception as e:
+                print(e)
+            messages.add_message(request, messages.ERROR, "You're not authorized !!!")
             return redirect('signin')
         else:
             messages.add_message(request, messages.ERROR, "Your username and password doesn't match !!!")
             return redirect('signin')
+
+
+def signout(request):
+    logout(request)
+    messages.add_message(request, messages.ERROR, "You've been logged out!")
+    return redirect('signin')
+
+
+@login_required(login_url='signin')
+def dashboard(request):
+    print(restaurant_obj)
+    return render(request, 'dashboard.html')
+
+
+def tables(request):
+    data1 = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant_obj)
+    context = {
+        'table': data1,
+    }
+    return render(request, 'table.html', context)
+
 
 def signup(request):
     if request.user.is_authenticated:

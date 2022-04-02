@@ -81,7 +81,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class UserRestaurant(models.Model):
     user = models.OneToOneField('CustomUser', on_delete=models.CASCADE)
-    course = models.ForeignKey('api.Restaurant', null=True, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey('api.Restaurant', null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.username

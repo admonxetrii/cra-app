@@ -30,7 +30,6 @@ class Restaurant(models.Model):
     addedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
     modifiedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    modifiedBy = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     restaurantType = models.ManyToManyField(RestaurantType)
 
     def __str__(self):

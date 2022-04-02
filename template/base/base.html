@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/images/logo.png' %}">
-    <title>{% block 'title' %}{% endblock %} - Tropical Rest</title>
+    <title>{% block 'title' %}{% endblock %} - Pycemon Order</title>
     <!-- This page CSS -->
     {% block 'css' %} {% endblock %}
     <!--c3 plugins CSS -->
@@ -18,7 +18,7 @@
     <!-- toast CSS -->
     <link href="{% static 'assets/node_modules/toast-master/css/jquery.toast.css' %}" rel="stylesheet">
     <!--alerts CSS -->
-    <link href="{%  static 'assets/node_modules/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/node_modules/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static 'dist/css/style.css' %}" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -27,54 +27,58 @@
     <script src="{% static 'dist/js/html5shiv.js' %}"></script>
     <script src="{% static 'dist/js/respond.min.js' %}"></script>
     <style>
-        .titlehovcustom{
+        .titlehovcustom {
             color: black !important;
         }
-        .titlehovcustom:hover{
+
+        .titlehovcustom:hover {
             color: red !important;
         }
     </style>
     <!-- Calendar CSS -->
-<![endif]-->
+    <![endif]-->
 </head>
 
 <body class="skin-default-dark fixed-layout">
-    <!-- ============================================================== -->
-    <!-- Preloader - style you can find in spinners.css -->
-    <!-- ============================================================== -->
-    <div class="preloader">
-        <div class="loader">
-            <div class="loader__figure"></div>
-            <p class="loader__label">Pycemon Order</p>
-        </div>
+<!-- ============================================================== -->
+<!-- Preloader - style you can find in spinners.css -->
+<!-- ============================================================== -->
+<div class="preloader">
+    <div class="loader">
+        <div class="loader__figure"></div>
+        <p class="loader__label">Pycemon Order</p>
     </div>
-    <!-- ============================================================== -->
-    <!-- Main wrapper - style you can find in pages.scss -->
-    <!-- ============================================================== -->
-    <span id="main-wrapper">
+</div>
+<!-- ============================================================== -->
+<!-- Main wrapper - style you can find in pages.scss -->
+<!-- ============================================================== -->
+<span id="main-wrapper">
         <!-- ============================================================== -->
-        <!-- Topbar header - style you can find in pages.scss -->
-        <!-- ============================================================== -->
+    <!-- Topbar header - style you can find in pages.scss -->
+    <!-- ============================================================== -->
         <header class="topbar">
             <nav class="navbar top-navbar navbar-expand-md ">
                 <!-- ============================================================== -->
                 <!-- Logo -->
                 <!-- ============================================================== -->
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="{% url 'table' %}">
+                    <a class="navbar-brand" href="#">
                         <!-- Logo icon --><b>
                             <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
-                            <!-- Dark Logo icon -->
-                            <img src="{% static 'assets/images/logo.png' %}" alt="homepage" class="dark-logo"  height="45px"/>
-                            <!-- Light Logo icon -->
-                            <img src="{% static 'assets/images/logo.png' %}" alt="homepage" class="light-logo" height="45px" />
+                        <!-- Dark Logo icon -->
+                            <img src="{% static 'assets/images/logo.png' %}" alt="homepage" class="dark-logo"
+                                 height="45px"/>
+{#                            <span>{{ user.userrestaurant.restaurant.name }}</span>#}
+                        <!-- Light Logo icon -->
+                            <img src="{% static 'assets/images/logo.png' %}" alt="homepage" class="light-logo"
+                                 height="45px"/>
+{#                        <span>{{ user.userrestaurant.restaurant.name }}</span>#}
                         </b>
                         <!--End Logo icon -->
                         <!-- Logo text --><span>
                         <!-- dark Logo text -->
-                         <img src="{% static 'assets/images/logo-text.png' %}" alt="homepage" class="dark-logo" />
-                         <!-- Light Logo text -->
-                         <img src="{% static 'assets/images/logo-text.png' %}" class="light-logo" alt="homepage" />
+{#                         <img src="{% static 'assets/images/logo-text.png' %}" alt="homepage" class="dark-logo" />#}
+                        <span class="dark-logo text-dark font-weight-bold mb-0 h3">{{ user.userrestaurant.restaurant.name }}</span>
                         </span> </a>
                 </div>
                 <!-- ============================================================== -->
@@ -86,7 +90,8 @@
                     <!-- ============================================================== -->
                     <ul class="navbar-nav mr-auto">
                         <!-- This is  -->
-                        <li class="nav-item hidden-sm-up"> <a class="nav-link nav-toggler waves-effect waves-light" href="javascript:void(0)"><i class="ti-menu"></i></a></li>
+                        <li class="nav-item hidden-sm-up"> <a class="nav-link nav-toggler waves-effect waves-light"
+                                                              href="javascript:void(0)"><i class="ti-menu"></i></a></li>
                         <!-- ============================================================== -->
                         <!-- Search -->
                         <!-- ============================================================== -->
@@ -101,11 +106,16 @@
                         <!-- User profile and search -->
                         <!-- ============================================================== -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="text-danger" style="font-size: small">{{ user.first_name }} {{ user.last_name }} </span>
-                                {% if request.user.profilepic.image %}
-                                    <img src="{{ MEDIA_URL }}{{ request.user.profilepic.image.url }}" alt="user" class="img-circle" width="30" height="30">
+                            <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark" href=""
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span
+                                    class="text-danger"
+                                    style="font-size: small">{{ user.first_name }} {{ user.last_name }} </span>
+                                {% if request.user.profile_picture %}
+                                    <img src="{{ MEDIA_URL }}{{ request.user.profile_picture.url }}" alt="user"
+                                         class="img-circle" width="30" height="30">
                                 {% else %}
-                                    <img src="{% static 'assets/images/default-pro-pic.jpg' %}" alt="user" class="img-circle" width="30">
+                                    <img src="{% static 'assets/images/default-pro-pic.jpg' %}" alt="user"
+                                         class="img-circle" width="30">
                                 {% endif %}
                             </a>
                             <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
@@ -113,9 +123,11 @@
                                 <div class="d-flex no-block align-items-center p-15 bg-danger text-white m-b-10">
                                     <div class="">
                                         {% if request.user.profilepic.image %}
-                                            <img src="{{ MEDIA_URL }}{{ request.user.profilepic.image.url }}" alt="user" class="img-circle" height="60" width="60">
+                                            <img src="{{ MEDIA_URL }}{{ request.user.profilepic.image.url }}" alt="user"
+                                                 class="img-circle" height="60" width="60">
                                         {% else %}
-                                            <img src="{% static 'assets/images/default-pro-pic.jpg' %}" alt="user" class="img-circle" width="60">
+                                            <img src="{% static 'assets/images/default-pro-pic.jpg' %}" alt="user"
+                                                 class="img-circle" width="60">
                                         {% endif %}
                                     </div>
                                     <div class="m-l-10">
@@ -123,11 +135,12 @@
                                         <p class=" m-b-0">@{{ user }}</p>
                                     </div>
                                 </div>
-                                <a class="dropdown-item" href="{% url 'profile' %}"><i class="ti-user m-r-5 m-l-5"></i> My Profile</a>
+                                <a class="dropdown-item" href="#"><i class="ti-user m-r-5 m-l-5"></i> My Profile</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'setting' %}"><i class="ti-settings m-r-5 m-l-5"></i> Account Setting</a>
+                                <a class="dropdown-item" href="#"><i class="ti-settings m-r-5 m-l-5"></i> Account Setting</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'signout' %}"><i class="fa fa-power-off m-r-5 m-l-5"></i> Logout</a>
+                                <a class="dropdown-item" href="{% url 'signout' %}"><i
+                                        class="fa fa-power-off m-r-5 m-l-5"></i> Logout</a>
                                 <div class="dropdown-divider"></div>
                             </div>
                         </li>
@@ -138,17 +151,19 @@
                 </div>
             </nav>
         </header>
-        <!-- ============================================================== -->
-        <!-- End Topbar header -->
-        <!-- ============================================================== -->
-        <!-- ============================================================== -->
-        <!-- Left Sidebar - style you can find in sidebar.scss  -->
-        <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- End Topbar header -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- Left Sidebar - style you can find in sidebar.scss  -->
+    <!-- ============================================================== -->
         <aside class="left-sidebar">
             <div class="d-flex no-block nav-text-box align-items-center">
                 <span><img src="{% static 'assets/images/logo.png' %}" alt="Tropical Rest" height="40px"></span>
-                <a class="waves-effect waves-dark ml-auto hidden-sm-down" href="javascript:void(0)"><i class="ti-menu"></i></a>
-                <a class="nav-toggler waves-effect waves-dark ml-auto hidden-sm-up" href="javascript:void(0)"><i class="ti-menu ti-close"></i></a>
+                <a class="waves-effect waves-dark ml-auto hidden-sm-down" href="javascript:void(0)"><i
+                        class="ti-menu"></i></a>
+                <a class="nav-toggler waves-effect waves-dark ml-auto hidden-sm-up" href="javascript:void(0)"><i
+                        class="ti-menu ti-close"></i></a>
             </div>
             <!-- Sidebar scroll-->
             <div class="scroll-sidebar">
@@ -156,23 +171,38 @@
                 <nav class="sidebar-nav">
 
                     <ul id="sidebarnav">
-                        <li> <a class="waves-effect waves-dark {% if request.url == '/dashboard/' %} active {% endif %} " href="{% url 'dashboard' %}" aria-expanded="false"><i class="fas fa-utensils"></i><span class="hide-menu">Menu</span></a></li>
-                        <li> <a class="has-arrow waves-effect waves-dark" aria-expanded="false"><i class="fa fa-user"></i><span class="hide-menu">Profile</span></a>
+                        <li> <a class="waves-effect waves-dark {% if request.url == '/dashboard/' %} active {% endif %} "
+                                href="{% url 'dashboard' %}" aria-expanded="false"><i class="fas fa-utensils"></i><span
+                                class="hide-menu">Menu</span></a></li>
+                        <li> <a class="has-arrow waves-effect waves-dark" aria-expanded="false"><i
+                                class="fa fa-user"></i><span class="hide-menu">Profile</span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li><a href="{% url 'profile' %}">Profile Page<i class="far fa-user text-success"></i></a></li>
-                                <li><a href="{% url 'setting' %}">Account Settings<i class="ti-settings text-info"></i></a></li>
+                                <li><a href="#">Profile Page<i class="far fa-user text-success"></i></a></li>
+                                <li><a href="#">Account Settings<i class="ti-settings text-info"></i></a></li>
                             </ul>
                         </li>
-                        <li> <a class="waves-effect waves-dark {% if request.url == '/table/' %} active {% endif %} " href="{% url 'table' %}" aria-expanded="false"><i class="fa fa-table"></i><span class="hide-menu"></span>Tables</a></li>
+                        <li> <a class="waves-effect waves-dark {% if request.url == '/table/' %} active {% endif %} "
+                                href="{% url 'table' %}" aria-expanded="false"><i class="fa fa-table"></i><span
+                                class="hide-menu"></span>Tables</a></li>
                         {% if request.user.is_staff %}
-                            <li> <a class="waves-effect waves-dark {% if request.url == '/report/' %} active {% endif %} " href="{% url 'report' %}" aria-expanded="false"><i class="fa fa-dollar-sign"></i><span class="hide-menu"></span>Reports</a></li>
-                            <li> <a class="waves-effect waves-dark {% if request.url == '/total-item/' %} active {% endif %} " href="{% url 'serverditem' %}" aria-expanded="false"><i class="fa fa-clipboard-check"></i><span class="hide-menu"></span>Total Item</a></li>
-                            <li> <a class="waves-effect waves-dark {% if request.url == '/unserved-items/' %} active {% endif %} " href="{% url 'unserveditems' %}" aria-expanded="false"><i class="fa fa-clipboard"></i><span class="hide-menu"></span>Unserved Items</a></li>
+                            <li> <a class="waves-effect waves-dark {% if request.url == '/report/' %} active {% endif %} "
+                                    href="#" aria-expanded="false"><i class="fa fa-dollar-sign"></i><span
+                                    class="hide-menu"></span>Reports</a></li>
+                            <li> <a class="waves-effect waves-dark {% if request.url == '/total-item/' %} active {% endif %} "
+                                    href="#" aria-expanded="false"><i class="fa fa-clipboard-check"></i><span
+                                    class="hide-menu"></span>Total Item</a></li>
+                            <li> <a class="waves-effect waves-dark {% if request.url == '/unserved-items/' %} active {% endif %} "
+                                    href="#" aria-expanded="false"><i class="fa fa-clipboard"></i><span
+                                    class="hide-menu"></span>Unserved Items</a></li>
                         {% endif %}
 
                         {% if request.user.is_superuser %}
-                            <li> <a class="waves-effect waves-dark {% if request.url == '/users/' %} active {% endif %} " href="{% url 'users' %}" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu"></span>Users</a></li>
-                            <li> <a class="waves-effect waves-dark {% if request.url == '/logs/' %} active {% endif %} " href="{% url 'logs' %}" aria-expanded="false"><i class="fa fa-clipboard-list"></i><span class="hide-menu"></span>Logs</a></li>
+                            <li> <a class="waves-effect waves-dark {% if request.url == '/users/' %} active {% endif %} "
+                                    href="#" aria-expanded="false"><i class="fa fa-users"></i><span
+                                    class="hide-menu"></span>Users</a></li>
+                            <li> <a class="waves-effect waves-dark {% if request.url == '/logs/' %} active {% endif %} "
+                                    href="#" aria-expanded="false"><i class="fa fa-clipboard-list"></i><span
+                                    class="hide-menu"></span>Logs</a></li>
                         {% endif %}
                     </ul>
                     <div class="font-weight-bold text-center">
@@ -183,12 +213,12 @@
             </div>
             <!-- End Sidebar scroll-->
         </aside>
-        <!-- ============================================================== -->
-        <!-- End Left Sidebar - style you can find in sidebar.scss  -->
-        <!-- ============================================================== -->
-        <!-- ============================================================== -->
-        <!-- Page wrapper  -->
-        <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- End Left Sidebar - style you can find in sidebar.scss  -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- Page wrapper  -->
+    <!-- ============================================================== -->
         <div class="page-wrapper">
             <!-- ============================================================== -->
             <!-- Container fluid  -->
@@ -230,29 +260,32 @@
             <!-- End Container fluid  -->
             <!-- ============================================================== -->
         </div>
-        <!-- ============================================================== -->
-        <!-- End Page wrapper  -->
-        <!-- ============================================================== -->
-        <!-- ============================================================== -->
-        <!-- footer -->
-        <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- End Page wrapper  -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- footer -->
+    <!-- ============================================================== -->
         <footer class="footer">
             <div class="row">
-                <div class="col-md-4 text-left"  >
-                    <a href="#" class="text-danger">Help </a> - <a target="_blank" href="http://pycemontech.com.np" class="text-danger">About Us</a>
+                <div class="col-md-4 text-left">
+                    <a href="#" class="text-danger">Help </a> - <a target="_blank" href="http://pycemontech.com.np"
+                                                                   class="text-danger">About Us</a>
                 </div>
                 <div class="col-md-4 text-center">
-                    © 2020 Tropical Rest - Powered by <a href="https://nishamwagle.com.np/" target="_blank" class="text-danger">Nisham Wagle</a>
+                    © 2020 Tropical Rest - Powered by <a href="https://nishamwagle.com.np/" target="_blank"
+                                                         class="text-danger">Nisham Wagle</a>
                 </div>
                 <div class="col-md-4 text-right">
-                    <a href="{% url 'policy' %}" target="_blank" class="text-danger" >Privacy & Policy</a> - <a href="{% url 'eula' %}" target="_blank" class="text-danger" >End User License Agreement</a>
+                    <a href="#" target="_blank" class="text-danger">Privacy & Policy</a> - <a href="#" target="_blank"
+                                                                                              class="text-danger">End User License Agreement</a>
                 </div>
             </div>
 
         </footer>
-        <!-- ============================================================== -->
-        <!-- End footer -->
-        <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- End footer -->
+    <!-- ============================================================== -->
     </div>
     <!-- ============================================================== -->
     <!-- End Wrapper -->
@@ -348,13 +381,13 @@
 
     <script src="{% static 'dist/js/pages/validation.js' %}"></script>
     <script>
-    ! function(window, document, $) {
+    !function (window, document, $) {
         "use strict";
         $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
     }(window, document, jQuery);
     </script>
 
- <!-- Sweet-Alert  -->
+    <!-- Sweet-Alert  -->
     <script src="{% static 'assets/node_modules/sweetalert2/dist/sweetalert2.all.min.js' %}"></script>
     <script src="{% static 'assets/node_modules/sweetalert2/sweet-alert.init.js' %}"></script>
 
@@ -365,9 +398,9 @@
 
     </script>
 
-{% block 'script' %}
+    {% block 'script' %}
 
-{% endblock %}
+    {% endblock %}
 </body>
 
 </html>

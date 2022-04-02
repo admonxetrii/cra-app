@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser
+from .models import CustomUser, UserRestaurant
 from django.contrib.auth.admin import UserAdmin
 
 
@@ -72,3 +72,4 @@ class UserAdminConfig(UserAdmin):
 
 
 admin.site.register(CustomUser, UserAdminConfig)
+admin.site.register(UserRestaurant)
