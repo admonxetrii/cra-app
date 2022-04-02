@@ -10,7 +10,7 @@ import pytz
 
 utc = pytz.timezone(zone="Asia/Kathmandu")
 
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication, JWTAuthentication
 
 from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation, RestaurantFloorLevel, \
     RestaurantTable, Favourites, IsFavourite
@@ -23,6 +23,7 @@ from algorithm.cosine_similarity import descriptionCosineSimilarity
 
 # Create your views here.
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantSerializer
 
@@ -42,6 +43,7 @@ class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 
 class RestaurantCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantCategorySerializer
 
@@ -81,6 +83,7 @@ class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin,
 
 
 class MenuCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategorySerializer
 
@@ -97,6 +100,7 @@ class MenuCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 
 class MenuCategoryDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategorySerializer
     queryset = MenuCategory.objects.all()
@@ -113,6 +117,7 @@ class MenuCategoryDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixi
 
 
 class MenuAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuSerializer
 
@@ -129,6 +134,7 @@ class MenuAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 
 class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuSerializer
     queryset = Menu.objects.all()
@@ -145,6 +151,7 @@ class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, gener
 
 
 class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permissions_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategoryListBasedOnRestaurant
 
@@ -156,6 +163,7 @@ class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
 
 
 class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     serializer_class = RestaurantSerializer
 
     def get_queryset(self, *args, **kwargs):
@@ -166,6 +174,7 @@ class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
 
 
 class CheckSimilarityOfRestaurants(APIView):
+    authentication_classes = [JWTAuthentication]
     permissions_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -217,6 +226,7 @@ class CheckSimilarityOfRestaurants(APIView):
 
 
 class GetSimilarityPercentageSerializer(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SimilaritySerializer
 
@@ -235,6 +245,7 @@ class GetSimilarityPercentageSerializer(generics.ListAPIView):
 
 
 class GetSimilarRestaurants(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantSerializer
 
@@ -256,6 +267,7 @@ class GetSimilarRestaurants(generics.ListAPIView):
 
 
 class TableListBasedOnRestaurantAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permissions_classes = [permissions.IsAuthenticated]
     serializer_class = FloorLevelListBasedOnRestaurant
 
@@ -267,6 +279,7 @@ class TableListBasedOnRestaurantAPIView(generics.ListAPIView):
 
 
 class ReservedTableListByUserAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ReservationsByUserSerializer
 
@@ -345,6 +358,7 @@ class ConfirmTableBookingAPIView(APIView):
 
 
 class FavouriteRestaurant(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.AllowAny]
     serializer_class = RestaurantSerializer
 
@@ -361,6 +375,7 @@ class FavouriteRestaurant(generics.ListAPIView):
 
 
 class EditFavourite(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.AllowAny]
     serializer_class = RestaurantSerializer
 
@@ -393,6 +408,7 @@ class EditFavourite(APIView):
 
 
 class IsFavouriteAPI(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = IsFavouriteSerializer
 

@@ -54,7 +54,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_customer = models.BooleanField(default=False)
     is_premium_customer = models.BooleanField(default=False)
-    is_waiter = models.BooleanField(default=False)
+    is_restaurant_representative = models.BooleanField(default=False)
 
     objects = CustomAccountManager()
 
@@ -79,4 +79,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         super().save(*args, **kwargs)
 
 
+class UserRestaurant(models.Model):
+    user = models.OneToOneField('CustomUser', on_delete=models.CASCADE)
+    course = models.ForeignKey('api.Restaurant', null=True, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+        db_table = "RESTAURANT_USER"

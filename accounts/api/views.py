@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 from crabackend import settings
 
 from .permissions import AnonPermissionOnly
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication, JWTAuthentication
 from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
 
 import string, random
@@ -20,6 +20,7 @@ User = get_user_model()
 
 
 class AuthAPIView(TokenObtainPairView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [AnonPermissionOnly]
     serializer_class = UserLoginSerializer
 
@@ -40,6 +41,7 @@ class LogoutView(APIView):
 
 
 class UserDetailAPIView(generics.RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserProfileSerializer
 
@@ -48,6 +50,7 @@ class UserDetailAPIView(generics.RetrieveAPIView):
 
 
 class CustomUserCreate(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -70,7 +73,7 @@ class CustomUserCreate(APIView):
 
             newuser = reg_serializer.save()
             if newuser:
-                # send_email_token(newuser)
+                send_email_token(newuser)
                 print("success")
                 return Response({"status": status.HTTP_201_CREATED,
                                  "message": "Successfully Registered.", "username": newuser.username})
@@ -81,6 +84,7 @@ class CustomUserCreate(APIView):
 
 
 class VerifyOtp(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -112,6 +116,7 @@ class VerifyOtp(APIView):
 
             otpStatus, time = send_otp_to_email(data.get('email'), user_obj)
             if otpStatus:
+                send_email_token(user_obj)
                 return Response({"message": "OTP sent successfully.", "status": status.HTTP_200_OK})
             return Response({"message": f"Try after {time} seconds", "status": status.HTTP_404_NOT_FOUND})
 
@@ -121,6 +126,7 @@ class VerifyOtp(APIView):
 
 
 class ForgotPassword(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -136,6 +142,7 @@ class ForgotPassword(APIView):
             user_obj.set_password(password)
             user_obj.save()
             print(password)
+            send_password_reset_token(user_obj, password)
             return Response({"message": "New password has been sent to email.", "status": status.HTTP_200_OK})
         except Exception as e:
             print(e)
@@ -143,6 +150,7 @@ class ForgotPassword(APIView):
 
 
 class ChangePassword(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -181,3 +189,15 @@ def send_email_token(user_obj):
     except Exception as e:
         print(e)
     return "Cannot send OTP"
+
+
+def send_password_reset_token(user_obj, password):
+    try:
+        subject = "Your Password has been changed."
+        message = f"Hello {user_obj.username}, please use your password as ${password}."
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [user_obj.email]
+        send_mail(subject, message, email_from, recipient_list)
+    except Exception as e:
+        print(e)
+    return "Cannot send email"
