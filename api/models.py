@@ -181,6 +181,9 @@ class TableReservationDates(models.Model):
     confirmation = models.BooleanField(default=0)
     addedTime = models.DateTimeField(auto_now=True)
     cancelled = models.BooleanField(default=0)
+    success = models.BooleanField(default=0)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+    cancelled_reason = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.table.tableName + " " + str(self.startDate)

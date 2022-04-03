@@ -2,8 +2,7 @@
 {% block 'title' %} Tables {% endblock %}
 {% load static %}
 {% block 'script' %}
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 {% endblock %}
 {% block 'body' %}
     <div class="row">
@@ -14,9 +13,9 @@
                     <div class="table-responsive m-t-40">
                         <table id="myTable" class="table table-bordered table-striped">
                             <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th>Table</th>
-                                <th>Group Size</th>
+                                <th>Pax</th>
                                 <th>Reservation Time</th>
                                 <th>Reserved By</th>
                                 <th>Phone</th>
@@ -25,16 +24,21 @@
                             </thead>
                             <tbody>
                             {% for n in new %}
-                                <tr>
-                                    <td><span class="font-weight-bold">{{ n.table.tableName }}</span></td>
-                                    <td>{{ n.groupSize }}</td>
-                                    <td>From {{ n.startDate }} to {{ n.endDate }}</td>
-                                    <td>{{ n.user.first_name }} {{ n.user.last_name }}</td>
-                                    <td>{{ n.user.phone_number }}</td>
-                                    <td><a href="javascript:void(0)"
-                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Approve</a>
+                                <tr class="text-center">
+                                    <td class="align-middle"><span
+                                            class="font-weight-bold">{{ n.reservation.table.tableName }}</span></td>
+                                    <td class="align-middle font-weight-bold">{{ n.reservation.groupSize }}</td>
+                                    <td class="align-middle" width="30%"><span
+                                            class="text-danger font-weight-bold">{{ n.reservation.startDate|date:"M jS, Y" }}</span><br>
+                                        From <span class="font-weight-bold">{{ n.reservation.startDate|date:"h:i A" }}</span> to
+                                        <span class="font-weight-bold">{{ n.reservation.endDate|date:"h:i A" }}</span></td>
+                                    <td class="align-middle">{{ n.reservation.user.first_name }} {{ n.reservation.user.last_name }}</td>
+                                    <td class="align-middle">{{ n.reservation.user.phone_number }}</td>
+                                    <td class="align-middle" width="20%"><a data-toggle="modal"
+                                                                            data-target="#reservationApprove{{ n.reservation.id }}"
+                                                                            class="btn btn-sm btn-rounded btn-outline-success">Approve</a>
                                         <a href="javascript:void(0)"
-                                           class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
+                                           class="btn btn-sm btn-rounded btn-outline-danger">Refuse</a></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -64,13 +68,13 @@
                                 <tr>
                                     <td><span class="font-weight-bold">{{ c.table.tableName }}</span></td>
                                     <td>{{ c.groupSize }}</td>
-                                    <td>From {{ c.startDate }} to {{ c.endDate }}</td>
+                                    <td><span
+                                            class="text-danger font-weight-bold">{{ c.startDate|date:"M jS, Y" }}:</span>
+                                        From <span class="font-weight-bold">{{ c.startDate|date:"h:i A" }}</span> to
+                                        <span class="font-weight-bold">{{ c.endDate|date:"h:i A" }}</span></td>
                                     <td>{{ c.user.first_name }} {{ c.user.last_name }}</td>
                                     <td>{{ c.user.phone_number }}</td>
-                                    <td><a href="javascript:void(0)"
-                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Approve</a>
-                                        <a href="javascript:void(0)"
-                                           class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
+                                    <td></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -79,10 +83,10 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Old Reservations Reservations</h4>
+                    <h4 class="card-title">Success Reservations</h4>
                     <div class="table-responsive m-t-40">
                         <table id="myTable3" class="table table-bordered table-striped">
                             <thead>
@@ -96,17 +100,56 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for c in confirmed %}
+                            {% for o in old %}
                                 <tr>
-                                    <td><span class="font-weight-bold">{{ c.table.tableName }}</span></td>
-                                    <td>{{ c.groupSize }}</td>
-                                    <td>From {{ c.startDate }} to {{ c.endDate }}</td>
-                                    <td>{{ c.user.first_name }} {{ c.user.last_name }}</td>
+                                    <td><span class="font-weight-bold">{{ o.table.tableName }}</span></td>
+                                    <td>{{ o.groupSize }}</td>
+                                    <td><span
+                                            class="text-danger font-weight-bold">{{ o.startDate|date:"M jS, Y" }}:</span>
+                                        From <span class="font-weight-bold">{{ o.startDate|date:"h:i A" }}</span> to
+                                        <span class="font-weight-bold">{{ o.endDate|date:"h:i A" }}</span></td>
+                                    <td>{{ c.user.first_name }} {{ o.user.last_name }}</td>
                                     <td>{{ c.user.phone_number }}</td>
                                     <td><a href="javascript:void(0)"
-                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Approve</a>
+                                           class="btn btn-sm btn-rounded btn-outline-success">Approve</a>
                                         <a href="javascript:void(0)"
-                                           class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
+                                           class="btn m-t-5 btn-rounded btn-outline-danger">Refuse</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Cancelled Reservations</h4>
+                    <div class="table-responsive m-t-40">
+                        <table id="myTable2" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Group Size</th>
+                                <th>Reservation Time</th>
+                                <th>Reserved By</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for cn in cancelled %}
+                                <tr>
+                                    <td><span class="font-weight-bold">{{ cn.table.tableName }}</span></td>
+                                    <td>{{ cn.groupSize }}</td>
+                                    <td><span
+                                            class="text-danger font-weight-bold">{{ cn.startDate|date:"M jS, Y" }}:</span>
+                                        From <span class="font-weight-bold">{{ cn.startDate|date:"h:i A" }}</span> to
+                                        <span class="font-weight-bold">{{ cn.endDate|date:"h:i A" }}</span></td>
+                                    <td>{{ cn.user.first_name }} {{ cn.user.last_name }}</td>
+                                    <td>{{ cn.user.phone_number }}</td>
+                                    <td></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -116,4 +159,150 @@
             </div>
         </div>
     </div>
+
+    {% for n in new %}
+        <div class="modal fade" id="reservationApprove{{ n.reservation.id }}" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Approve Reservation - <b
+                                class="text-danger">{{ n.reservation.table.tableName }}</b></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'approve-reservation' n.reservation.id %}" novalidate>
+                            <div class="form-group">
+                                <h5>Reservation Date: <span class="text-danger">*</span></h5>
+                                <div class="input-group">
+                                    <input type="date" id="reservationDate{{ n.reservation.id }}" value="{{ n.date }}" class="form-control"
+                                           placeholder="dd/mm/yyyy" min="{{ n.date }}" max="{{ n.maxDate }}">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <h5>From Time: <span class="text-danger">*</span></h5>
+                                    <div class="input-group">
+                                        <select name="fromTime" id="fromTime{{ n.reservation.id }}" class="selectpicker"
+                                                data-validation-required-message="Please Select Time"
+                                                data-style="form-control btn-secondary" required onclick="changedVal();">
+                                            {% for ft in timeRange %}
+                                                <option value="{{ ft.time }}" {% if ft.time == n.fromTime %} selected {% endif %}>{{ ft.time }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>To Time: <span class="text-danger">*</span></h5>
+                                    <div class="input-group">
+                                        <select name="toTime" id="toTime{{ n.reservation.id }}" class="selectpicker"
+                                                data-validation-required-message="Please Select Time"
+                                                data-style="form-control btn-secondary" required>
+                                            {% for ft in timeRange %}
+                                                <option value="{{ ft.time }}" {% if ft.time == n.toTime %} selected {% endif %}>{{ ft.time }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <script type="text/javascript">
+                                $(function () {
+                                    $('#datepicker').datepicker();
+                                });
+                            </script>
+                            <div class="form-group">
+                                <h5>Select Table For Reservation: <span class="text-danger">*</span></h5>
+                                <div class="input-group">
+                                    <select name="table" id="table{{ n.reservation.id }}" class="selectpicker w-100"
+                                            data-validation-required-message="Please Select Table"
+                                            data-style="form-control btn-secondary" required>
+                                        {% for f in floorLevel %}
+                                            <optgroup label="{{ f.floorName }}">
+                                                {% for t in tables %}
+                                                    {% if t.floorLevel.id == f.id %}
+                                                        <option value="{{ t.id }}" {% if t.id == n.reservation.table.id %}
+                                                                selected {% endif %} >{{ t.tableName }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </optgroup>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <script>
+                                        var date{{ n.reservation.id }} = document.getElementById('reservationDate{{ n.reservation.id }}')
+                                        var fromTime{{ n.reservation.id }} = document.getElementById('fromTime{{ n.reservation.id }}')
+                                        var toTime{{ n.reservation.id }} = document.getElementById('toTime{{ n.reservation.id }}')
+
+                                        console.log(date{{ n.reservation.id }}.value)
+                                        console.log(fromTime{{ n.reservation.id }}.value)
+                                        console.log(toTime{{ n.reservation.id }}.value)
+
+                                        var result{{ n.reservation.id }} = {{ tables }};
+
+                                        var $table{{ n.reservation.id }} = $("#table{{ n.reservation.id }}");
+                                        $.each(result{{ n.reservation.id }}, function() {
+                                            $table{{ n.reservation.id }}.append($("<option />").val(this.id).text(this.tableName));
+                                        });
+
+                                </script>
+
+
+                            </div>
+                            <div class="form-group">
+                                <h5>Group Size: <span class="text-danger">*</span></h5>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-danger" type="button"
+                                                onclick="decrementValue{{ n.reservation.id }}();"><b> - </b></button>
+                                    </div>
+                                    <input type="number" name="groupSize" readonly class="form-control"
+                                           id="ordervalue{{ n.reservation.id }}" value="{{ n.reservation.groupSize }}" required min="1"
+                                           max="10">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success" type="button"
+                                                onclick="incrementValue{{ n.reservation.id }}();"><b> + </b></button>
+                                    </div>
+                                </div>
+                                <br>
+                                <script type="text/javascript">
+                                    function incrementValue{{ n.reservation.id }}() {
+                                        var value = parseInt(document.getElementById('ordervalue{{ n.reservation.id }}').value);
+                                        if (value < 10) {
+                                            value++;
+                                        }
+                                        document.getElementById('ordervalue{{ n.reservation.id }}').value = value;
+                                    }
+
+                                    function decrementValue{{ n.reservation.id }}() {
+                                        var value = parseInt(document.getElementById('ordervalue{{ n.reservation.id }}').value);
+                                        if (value > 1) {
+                                            value--;
+                                        }
+                                        document.getElementById('ordervalue{{ n.reservation.id }}').value = value;
+                                    }
+                                </script>
+                            </div>
+                            <div class="form-group">
+                                <h5>Remarks:</h5>
+                                <textarea class="form-control" name="remarks"></textarea>
+                            </div>
+                            <input type="number" value="{{ n.reservation.id }}" hidden>
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-info btn-block waves-effect waves-light">Approve
+                            </button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+
 {% endblock %}

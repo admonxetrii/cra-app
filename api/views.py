@@ -299,6 +299,7 @@ class ReservedTableListByUserAPIView(generics.ListAPIView):
                 rsvp_cancel_time = rsvp_date + fourty_five_min
                 if current_datetime > rsvp_cancel_time:
                     r.cancelled = True
+                    r.cancelled_reason = "USER_DIDNT_ARRIVED"
                     r.save()
                     print("User didn't arrived so cancelled")
             else:
@@ -307,6 +308,7 @@ class ReservedTableListByUserAPIView(generics.ListAPIView):
                 rsvp_cancel_time = rsvp_date - thirty_minute
                 if current_datetime > rsvp_cancel_time:
                     r.cancelled = True
+                    r.cancelled_reason = "NOT_CONFIRMED_FROM_RESTAURANT"
                     r.save()
                     print("Not Confirmed")
         get_rsvp_obj_final = TableReservationDates.objects.filter(user__id=user, cancelled=False).order_by("startDate")
