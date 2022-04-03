@@ -100,9 +100,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cra_db',
         'USER': 'root',
-        'PASSWORD': 'nouseofit',
+        'PASSWORD': '231Bac564#',
         'HOST': 'localhost',
-        'PORT': '3307',
+        'PORT': '3306',
     }
 }
 
@@ -162,7 +162,7 @@ EMAIL_HOST_PASSWORD = '3prh}B%67J(i'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis-17244.c89.us-east-1-3.ec2.cloud.redislabs.com:17244",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

@@ -183,7 +183,7 @@ class TableReservationDates(models.Model):
     cancelled = models.BooleanField(default=0)
 
     def __str__(self):
-        return self.table.tableName + " " + str(self.date)
+        return self.table.tableName + " " + str(self.startDate)
 
 
 class MergeTable(models.Model):

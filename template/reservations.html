@@ -11,7 +11,6 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">New Reservations</h4>
-                    <h6 class="card-subtitle">Data table example</h6>
                     <div class="table-responsive m-t-40">
                         <table id="myTable" class="table table-bordered table-striped">
                             <thead>
@@ -29,11 +28,83 @@
                                 <tr>
                                     <td><span class="font-weight-bold">{{ n.table.tableName }}</span></td>
                                     <td>{{ n.groupSize }}</td>
-                                    <td>{{ n.date }}</td>
+                                    <td>From {{ n.startDate }} to {{ n.endDate }}</td>
                                     <td>{{ n.user.first_name }} {{ n.user.last_name }}</td>
                                     <td>{{ n.user.phone_number }}</td>
                                     <td><a href="javascript:void(0)"
-                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Apporve</a>
+                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Approve</a>
+                                        <a href="javascript:void(0)"
+                                           class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Confirmed Reservations</h4>
+                    <div class="table-responsive m-t-40">
+                        <table id="myTable1" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Group Size</th>
+                                <th>Reservation Time</th>
+                                <th>Reserved By</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for c in confirmed %}
+                                <tr>
+                                    <td><span class="font-weight-bold">{{ c.table.tableName }}</span></td>
+                                    <td>{{ c.groupSize }}</td>
+                                    <td>From {{ c.startDate }} to {{ c.endDate }}</td>
+                                    <td>{{ c.user.first_name }} {{ c.user.last_name }}</td>
+                                    <td>{{ c.user.phone_number }}</td>
+                                    <td><a href="javascript:void(0)"
+                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Approve</a>
+                                        <a href="javascript:void(0)"
+                                           class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Old Reservations Reservations</h4>
+                    <div class="table-responsive m-t-40">
+                        <table id="myTable3" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Group Size</th>
+                                <th>Reservation Time</th>
+                                <th>Reserved By</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for c in confirmed %}
+                                <tr>
+                                    <td><span class="font-weight-bold">{{ c.table.tableName }}</span></td>
+                                    <td>{{ c.groupSize }}</td>
+                                    <td>From {{ c.startDate }} to {{ c.endDate }}</td>
+                                    <td>{{ c.user.first_name }} {{ c.user.last_name }}</td>
+                                    <td>{{ c.user.phone_number }}</td>
+                                    <td><a href="javascript:void(0)"
+                                           class="btn m-t-10 m-r-5 btn-rounded btn-outline-success">Approve</a>
                                         <a href="javascript:void(0)"
                                            class="btn m-t-10 btn-rounded btn-outline-danger">Refuse</a></td>
                                 </tr>

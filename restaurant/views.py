@@ -87,8 +87,8 @@ def reservations(request):
     old_reservations = []
     try:
         for r in res:
-            print(r.date)
-            if r.date > current_datetime:
+            print(r.startDate)
+            if r.startDate > current_datetime:
                 if r.confirmation:
                     confirmed_reservations.append(r)
                 else:
