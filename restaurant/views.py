@@ -78,9 +78,9 @@ def reservations(request):
         'addedTime')
     now = datetime.datetime.now()
     current_datetime = utc.localize(now)
-    rsvp_obj = res
-    for r in rsvp_obj:
+    for r in res:
         rsvp_date = r.startDate
+        print(rsvp_date)
         if r.confirmation:
             fourty_five_min = datetime.timedelta(minutes=45)
             print(current_datetime, fourty_five_min)
@@ -90,9 +90,9 @@ def reservations(request):
                 r.cancelled_reason = "USER_DIDNT_ARRIVED"
                 r.save()
                 print("User didn't arrived so cancelled")
-        else:
+        elif not r.cancelled and not r.confirmation:
             thirty_minute = datetime.timedelta(minutes=30)
-            print(current_datetime, rsvp_date)
+            print(current_datetime, rsvp_date, thirty_minute)
             rsvp_cancel_time = rsvp_date - thirty_minute
             if current_datetime > rsvp_cancel_time:
                 r.cancelled = True
@@ -100,8 +100,6 @@ def reservations(request):
                 r.save()
                 print("Not Confirmed")
 
-
-    now = datetime.datetime.now()
     current_datetime = utc.localize(now)
     new_reservations = []
     confirmed_reservations = []
@@ -112,6 +110,7 @@ def reservations(request):
     closeTime = datetime.datetime.strptime(str(restaurant.closingTime), '%H:%M:%S')
     difference = int(str(abs(closeTime - openTime)).split(':')[0])
 
+    res = TableReservationDates.objects.filter(table__floorLevel__restaurant=restaurant)
     try:
         for r in res:
             if r.cancelled:
@@ -137,14 +136,22 @@ def reservations(request):
         print(e)
     floorLevels = RestaurantFloorLevel.objects.filter(restaurant=restaurant)
     tables = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant)
-
+    tables_object = []
+    for t in tables:
+        print(t)
+        data = {
+            'id': t.id,
+            'table': t
+        }
+        tables_object.append(data)
 
     timeRange = []
-    for a in range(0, difference+1):
+    for a in range(0, difference + 1):
         timeFormat = openTime + datetime.timedelta(hours=a)
         timeRangeObj = {
             'id': f"TIME_{a}",
-            'time': timeFormat.strftime("%I:%M %p")
+            'time': timeFormat.strftime("%I:%M %p"),
+            'fullTime': timeFormat
         }
         timeRange.append(timeRangeObj)
 
@@ -156,12 +163,15 @@ def reservations(request):
         'tables': tables,
         'floorLevel': floorLevels,
         'res': res,
-        'timeRange': timeRange
+        'timeRange': timeRange,
+        'currentTime': now,
+        'tableObj': tables_object
     }
 
     return render(request, 'reservations.html', context)
 
-login_required(login_url='signin')
+
+@login_required(login_url='signin')
 def approve_reservation(request, id):
     date = request.POST.get('date')
     fromTime = request.POST.get('fromTime')
@@ -170,17 +180,20 @@ def approve_reservation(request, id):
     groupSize = request.POST.get('groupSize')
     remarks = request.POST.get('remarks')
     rsvp_obj = TableReservationDates.objects.get(id=id)
-    rsvp_obj.confirmation=1
-    rsvp_obj.remarks=remarks
+    rsvp_obj.confirmation = 1
+    rsvp_obj.remarks = remarks
     rsvp_obj.save()
     return redirect('reservations')
 
-login_required(login_url='signin')
+
+@login_required(login_url='signin')
 def cancel_reservation(request, id):
     r = TableReservationDates.objects.get(id=id)
     r.cancelled = 1
+    r.cancelled_reason = "CANCELLED_BY_RESTAURANT_USER"
     r.save()
     return redirect('reservations')
+
 
 def signup(request):
     if request.user.is_authenticated:
