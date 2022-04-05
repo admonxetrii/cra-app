@@ -142,7 +142,7 @@ def reservations(request):
         data = {
             'id': t.id,
             'table': t.tableName,
-            'seatCap': t.seatCapacity
+            'seatCap': t.seatCapacity,
         }
         tables_object.append(data)
 
@@ -150,12 +150,14 @@ def reservations(request):
     for r in res:
         if not r.cancelled:
             res_obj = {
+                'id': int(r.id),
                 'cancelled': int(r.cancelled),
                 'confirmation': int(r.confirmation),
                 'endDate': r.endDate.astimezone().strftime("%Y-%m-%d %H:%M:%S"),
                 'table': r.table.id,
                 'startDate': r.startDate.astimezone().strftime("%Y-%m-%d %H:%M:%S"),
-                'occupied': int(r.table.isOccupied)
+                'success': int(r.success),
+                'released': int(r.tableReleased)
             }
             rsvp_obj.append(res_obj)
 

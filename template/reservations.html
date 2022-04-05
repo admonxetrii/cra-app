@@ -354,6 +354,8 @@
                                 //Populate To Time of reservation:
                                 function getToTime{{ n.reservation.id }}() {
                                     var fromTimeStamp = document.getElementById('fromTimeRangeSelectElement{{ n.reservation.id }}');
+                                    var tables = document.getElementById('#tableSelect{{ n.reservation.id }}');
+                                    tables.setAttribute("hidden", "true");
                                     document.getElementById('tmpFromDate{{ n.reservation.id }}').value = fromTimeStamp.value;
                                     var fromTime = new Date(parseInt(fromTimeStamp.value));
                                     document.getElementById('#toTimeRangeSelect{{ n.reservation.id }}').removeAttribute("hidden");
@@ -407,16 +409,38 @@
                                             if (((fromTime.getTime() <= startDate.getTime()) && (toTime.getTime() > startDate.getTime())) || ((fromTime.getTime() < endDate.getTime()) && (toTime.getTime() >= endDate.getTime()))) {
                                                 if (tableObj[t].id === rsvpObj[r].table) {
                                                     if (!rsvpObj[r].cancelled) {
-                                                        opt.value = tableObj[t].id;
-                                                        opt.setAttribute("disabled", "true");
-                                                        opt.setAttribute("class", "text-danger");
-                                                        opt.innerHTML = `${tableObj[t].table} is booked for that time.`;
-                                                        select.appendChild(opt);
+                                                        var cur_res_id =
+                                                        {{ n.reservation.id }}
+                                                        if (cur_res_id === rsvpObj[r].id) {
+                                                            opt.value = tableObj[t].id;
+                                                            opt.innerHTML = `${tableObj[t].table} - Seat for ${tableObj[t].seatCap}.`;
+                                                            select.appendChild(opt);
+                                                        } else if (rsvpObj[r].success && rsvpObj[r].released === 0) {
+                                                            opt.value = tableObj[t].id;
+                                                            opt.setAttribute("disabled", "true");
+                                                            opt.setAttribute("class", "text-danger");
+                                                            opt.innerHTML = `${tableObj[t].table} is currently occupied.`;
+                                                            select.appendChild(opt);
+                                                        } else if (rsvpObj[r].success && rsvpObj[r].released === 1) {
+                                                            opt.value = tableObj[t].id;
+                                                            opt.innerHTML = `${tableObj[t].table} - Seat for ${tableObj[t].seatCap}.`;
+                                                            select.appendChild(opt);
+                                                        } else {
+                                                            opt.value = tableObj[t].id;
+                                                            opt.setAttribute("disabled", "true");
+                                                            opt.setAttribute("class", "text-danger");
+                                                            opt.innerHTML = `${tableObj[t].table} is booked for that time.`;
+                                                            select.appendChild(opt);
+                                                        }
                                                     } else {
                                                         opt.value = tableObj[t].id;
                                                         opt.innerHTML = `${tableObj[t].table} - Seat for ${tableObj[t].seatCap}.`;
                                                         select.appendChild(opt);
                                                     }
+                                                } else {
+                                                    opt.value = tableObj[t].id;
+                                                    opt.innerHTML = `${tableObj[t].table} - Seat for ${tableObj[t].seatCap}.`;
+                                                    select.appendChild(opt);
                                                 }
                                             } else {
                                                 opt.value = tableObj[t].id;
