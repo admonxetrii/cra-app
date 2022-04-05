@@ -127,6 +127,7 @@ def reservations(request):
                         'maxDate': str(maxDate).split(" ")[0],
                         'fromTime': fromTime,
                         'toTime': toTime,
+                        'table': r.table.tableName,
                         'reservation': r
                     }
                     new_reservations.append(newR)
@@ -138,20 +139,35 @@ def reservations(request):
     tables = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant)
     tables_object = []
     for t in tables:
-        print(t)
         data = {
             'id': t.id,
-            'table': t
+            'table': t.tableName
         }
         tables_object.append(data)
+
+    rsvp_obj = []
+    for r in res:
+        if not r.cancelled:
+            res_obj = {
+                'cancelled': int(r.cancelled),
+                'confirmation': int(r.confirmation),
+                'endDate': r.endDate.astimezone().strftime("%Y-%m-%d %H:%M:%S"),
+                'table': r.table.id,
+                'startDate': r.startDate.astimezone().strftime("%Y-%m-%d %H:%M:%S"),
+                'occupied': int(r.table.isOccupied)
+            }
+            rsvp_obj.append(res_obj)
 
     timeRange = []
     for a in range(0, difference + 1):
         timeFormat = openTime + datetime.timedelta(hours=a)
+        print(timeFormat.strftime('%H'))
         timeRangeObj = {
-            'id': f"TIME_{a}",
+            'id': a+1,
             'time': timeFormat.strftime("%I:%M %p"),
-            'fullTime': timeFormat
+            'hour': int(timeFormat.strftime(("%H"))),
+            'min': int(timeFormat.strftime(("%M")))
+            # 'fullTime': timeFormat
         }
         timeRange.append(timeRangeObj)
 
@@ -162,7 +178,7 @@ def reservations(request):
         'cancelled': cancelled,
         'tables': tables,
         'floorLevel': floorLevels,
-        'res': res,
+        'res': rsvp_obj,
         'timeRange': timeRange,
         'currentTime': now,
         'tableObj': tables_object

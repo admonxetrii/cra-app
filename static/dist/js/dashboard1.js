@@ -1,15 +1,15 @@
 $(function () {
     "use strict";
     //This is for the Notification top right
-    $.toast({
-            heading: 'Welcome to Elegant admin'
-            , text: 'Use the predefined ones, or specify a custom position object.'
-            , position: 'top-right'
-            , loaderBg: '#ff6849'
-            , icon: 'info'
-            , hideAfter: 3500
-            , stack: 6
-        })
+    // $.toast({
+    //         heading: 'Welcome to Elegant admin'
+    //         , text: 'Use the predefined ones, or specify a custom position object.'
+    //         , position: 'top-right'
+    //         , loaderBg: '#ff6849'
+    //         , icon: 'info'
+    //         , hideAfter: 3500
+    //         , stack: 6
+    //     })
     // ==============================================================
     // Our Visitor
     // ==============================================================
@@ -149,36 +149,36 @@ $(function () {
 
 });
     // sparkline
-    var sparklineLogin = function() {
-        $('#sales1').sparkline([1, 4, 5, 4, 5, 6, 6, 7, 5, 7, 5, 4, 3], {
-        type: 'line',
-        width: '100%',
-        height: '75',
-        lineColor: '#00bfbf',
-        fillColor: '#ecfaf8',
-        spotColor: undefined,
-        minSpotColor: undefined,
-        maxSpotColor: undefined,
-        highlightSpotColor: undefined,
-        highlightLineColor: '#494646',
-        spotRadius: 0
-        });
-
-        $('#sales2').sparkline([6, 10, 9, 11, 9, 10, 12], {
-            type: 'bar',
-            height: '130',
-            barWidth: '4',
-            width:'100%',
-            resize: true,
-            barSpacing: '8',
-            barColor: '#25a6f7'
-        });
-
-    };
-    var sparkResize;
-
-        $(window).resize(function(e) {
-            clearTimeout(sparkResize);
-            sparkResize = setTimeout(sparklineLogin, 500);
-        });
-        sparklineLogin();
+    // var sparklineLogin = function() {
+    //     $('#sales1').sparkline([1, 4, 5, 4, 5, 6, 6, 7, 5, 7, 5, 4, 3], {
+    //     type: 'line',
+    //     width: '100%',
+    //     height: '75',
+    //     lineColor: '#00bfbf',
+    //     fillColor: '#ecfaf8',
+    //     spotColor: undefined,
+    //     minSpotColor: undefined,
+    //     maxSpotColor: undefined,
+    //     highlightSpotColor: undefined,
+    //     highlightLineColor: '#494646',
+    //     spotRadius: 0
+    //     });
+    //
+    //     $('#sales2').sparkline([6, 10, 9, 11, 9, 10, 12], {
+    //         type: 'bar',
+    //         height: '130',
+    //         barWidth: '4',
+    //         width:'100%',
+    //         resize: true,
+    //         barSpacing: '8',
+    //         barColor: '#25a6f7'
+    //     });
+    //
+    // };
+    // var sparkResize;
+    //
+    //     $(window).resize(function(e) {
+    //         clearTimeout(sparkResize);
+    //         sparkResize = setTimeout(sparklineLogin, 500);
+    //     });
+    //     sparklineLogin();

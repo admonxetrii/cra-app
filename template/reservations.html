@@ -189,100 +189,46 @@
                             <div class="form-group">
                                 <h5>Reservation Date: <span class="text-danger">*</span></h5>
                                 <div class="input-group">
-                                    <input type="date" id="reservationDate{{ n.reservation.id }}" onchange="getReservationTime{{ n.reservation.id }}()" value="{{ n.date }}"
+                                    <input type="date" id="reservationDate{{ n.reservation.id }}"
+                                           onchange="getReservationTime{{ n.reservation.id }}()" value="{{ n.date }}"
                                            class="form-control"
                                            placeholder="dd/mm/yyyy" min="{{ n.date }}" max="{{ n.maxDate }}">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <div class="col-md-6">
+                                <div class="col-sm-6" id="#fromTimeRangeSelect{{ n.reservation.id }}" hidden>
                                     <h5>From Time: <span class="text-danger">*</span></h5>
-                                    <div class="input-group">
-                                        <select name="fromTime" id="fromTime{{ n.reservation.id }}" class="selectpicker"
-                                                data-validation-required-message="Please Select Time"
-                                                data-style="form-control btn-secondary" required
-                                                onclick="changedVal();">
-                                            {% for ft in timeRange %}
-                                                <option value="{{ ft.time }}" {% if ft.time == n.fromTime %}
-                                                        selected {% endif %}>{{ ft.time }}</option>
-                                            {% endfor %}
+                                    <div class="input-group" id="#fromTimeInit{{ n.reservation.id }}">
+                                        <select class="form-control" disabled>
+                                            <option value="{{ n.fromTime }}" selected>{{ n.fromTime }}</option>
                                         </select>
                                     </div>
+                                    <div class="input-group" id="fromTime{{ n.reservation.id }}">
+
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-sm-6" id="#toTimeRangeSelect{{ n.reservation.id }}" hidden>
                                     <h5>To Time: <span class="text-danger">*</span></h5>
-                                    <div class="input-group">
-                                        <select name="toTime" id="toTime{{ n.reservation.id }}" class="selectpicker"
-                                                data-validation-required-message="Please Select Time"
-                                                data-style="form-control btn-secondary" required>
-                                            {% for ft in timeRange %}
-                                                <option value="{{ ft.time }}" {% if ft.time == n.toTime %}
-                                                        selected {% endif %}>{{ ft.time }}</option>
-                                            {% endfor %}
+                                    <div class="input-group" id="#toTimeInit{{ n.reservation.id }}">
+                                        <select class="form-control" disabled>
+                                            <option value="{{ n.toTime }}" selected>{{ n.toTime }}</option>
                                         </select>
+                                    </div>
+                                    <div class="input-group" id="toTime{{ n.reservation.id }}">
+
                                     </div>
                                 </div>
                             </div>
-                            <script type="text/javascript">
-                                $(function () {
-                                    $('#datepicker').datepicker();
-                                });
-                            </script>
-                            <div class="form-group">
+                            <div class="form-group" id="#tableSelect{{ n.reservation.id }}" hidden>
                                 <h5>Select Table For Reservation: <span class="text-danger">*</span></h5>
-                                <div class="input-group">
-                                    <select name="table" id="table{{ n.reservation.id }}" class="selectpicker w-100"
-                                            data-validation-required-message="Please Select Table"
-                                            data-style="form-control btn-secondary" required>
-                                        {% for f in floorLevel %}
-                                            <optgroup label="{{ f.floorName }}">
-                                                {% for t in tables %}
-                                                    {% if t.floorLevel.id == f.id %}
-                                                        <option value="{{ t.id }}"
-                                                                {% if t.id == n.reservation.table.id %}
-                                                                selected {% endif %} >{{ t.tableName }}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </optgroup>
-                                        {% endfor %}
+                                <div class="input-group" id="#table{{ n.reservation.id }}">
+
+                                </div>
+                                <div class="input-group" id="#tableInit{{ n.reservation.id }}">
+                                    <select class="form-control" disabled>
+                                        <option value="{{ n.table }}" selected>{{ n.table }}</option>
                                     </select>
                                 </div>
-
-                                <script>
-                                    var date{{ n.reservation.id }} = document.getElementById('reservationDate{{ n.reservation.id }}');
-                                    var fromTime{{ n.reservation.id }} = document.getElementById('fromTime{{ n.reservation.id }}');
-                                    var toTime{{ n.reservation.id }} = document.getElementById('toTime{{ n.reservation.id }}');
-                                    var curentdate{{ n.reservation.id }} = new Date();
-                                    var dateString = '';
-
-                                    var h = curentdate{{ n.reservation.id }}.getHours();
-                                    var m = curentdate{{ n.reservation.id }}.getMinutes();
-
-                                    if (h < 10) h = '0' + h;
-                                    if (m < 10) m = '0' + m;
-
-
-                                    dateString = h + ':' + m;
-
-                                    function getReservationTime{{ n.reservation.id }}(){
-                                        {#var table{{ n.reservation.id }} = {{ tableObj }};#}
-                                        {#console.log(table)#}
-                                        {# $('#fromTime{{ n.reservation.id }}').val("02:00 PM");#}
-                                    }
-
-
-                                    console.log(date{{ n.reservation.id }}.value)
-                                    console.log(fromTime{{ n.reservation.id }}.value)
-                                    console.log(toTime{{ n.reservation.id }}.value)
-
-                                    {#var result{{ n.reservation.id }} = {{ tables }};#}
-                                    {##}
-                                    {#var $table{{ n.reservation.id }} = $("#table{{ n.reservation.id }}");#}
-                                    {#$.each(result{{ n.reservation.id }}, function () {#}
-                                    {#    $table{{ n.reservation.id }}.append($("<option />").val(this.id).text(this.tableName));#}
-                                </script>
-
-
                             </div>
                             <div class="form-group">
                                 <h5>Group Size: <span class="text-danger">*</span></h5>
@@ -323,10 +269,139 @@
                                 <h5>Remarks:</h5>
                                 <textarea class="form-control" name="remarks"></textarea>
                             </div>
-                            <input type="number" value="{{ n.reservation.id }}" hidden>
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-info btn-block waves-effect waves-light">Approve
+                            <button type="submit" id="#approveButton{{ n.reservation.id }}"
+                                    class="btn btn-info btn-block waves-effect waves-light">Approve
                             </button>
+                            <script>
+                                console.log("=========For ID: {{ n.reservation.id }}=============")
+                                var date{{ n.reservation.id }} = document.getElementById('reservationDate{{ n.reservation.id }}');
+                                var fromTime{{ n.reservation.id }} = document.getElementById('fromTime{{ n.reservation.id }}');
+                                var toTime{{ n.reservation.id }} = document.getElementById('toTime{{ n.reservation.id }}');
+
+                                //Date Calculation for current day
+                                var curentdate = new Date();
+                                var dateString_hour = '';
+                                var dateString_min = '';
+                                var dateString = '';
+                                var month = parseInt(curentdate.getMonth()) + 1;
+                                dateString = `${curentdate.getFullYear()}-${month < 10 ? '0' + month : month}-${(curentdate.getMonth() < 10) ? '0' + curentdate.getDate() : curentdate.getDate()}`
+
+                                var h = curentdate.getHours();
+                                var m = curentdate.getMinutes();
+                                if (h < 10) h = '0' + h;
+                                if (m < 10) m = '0' + m;
+                                dateString_hour = parseInt(h);
+                                dateString_min = parseInt(m);
+
+                                //Data got from views
+                                var tableObj = {{ tableObj|safe }};
+                                var rsvpObj = {{ res|safe }};
+                                var timeRangeObj = {{ timeRange|safe }};
+
+
+                                initialize{{ n.reservation.id }}();
+
+                                function initialize{{ n.reservation.id }}() {
+                                    var fromTime = document.getElementById('#fromTimeRangeSelect{{ n.reservation.id }}');
+                                    var toTime = document.getElementById('#toTimeRangeSelect{{ n.reservation.id }}');
+                                    var tables = document.getElementById('#tableSelect{{ n.reservation.id }}');
+                                    fromTime.removeAttribute("hidden");
+                                    toTime.removeAttribute("hidden");
+                                    tables.removeAttribute("hidden");
+                                }
+
+                                //Populate Select Fields for from time
+                                function getReservationTime{{ n.reservation.id }}() {
+                                    curentdate = new Date();
+                                    document.getElementById('#fromTimeRangeSelect{{ n.reservation.id }}').removeAttribute("hidden");
+                                    document.getElementById('#fromTimeInit{{ n.reservation.id }}').setAttribute("hidden", "true");
+                                    document.getElementById('#toTimeInit{{ n.reservation.id }}').setAttribute("hidden", "true");
+                                    document.getElementById('#toTimeRangeSelect{{ n.reservation.id }}').setAttribute("hidden", "true");
+                                    document.getElementById('#tableSelect{{ n.reservation.id }}').setAttribute("hidden", "true");
+                                    document.getElementById('#tableInit{{ n.reservation.id }}').setAttribute("hidden", "true");
+                                    document.getElementById('#approveButton{{ n.reservation.id }}').setAttribute("disabled", "true");
+                                    let select = document.createElement('select');
+                                    select.setAttribute("class", "form-control")
+                                    select.setAttribute("id", "fromTimeRangeSelectElement{{ n.reservation.id }}")
+                                    select.setAttribute("name", "fromDate");
+                                    select.setAttribute("onchange", "getToTime{{ n.reservation.id }}()");
+                                    for (f in timeRangeObj) {
+                                        var selectedDate = new Date(date{{ n.reservation.id }}.value + " " + timeRangeObj[f].hour + ":00:00");
+                                        var opt = document.createElement('option');
+                                        if (dateString === date{{ n.reservation.id }}.value) {
+                                            if (new Date(curentdate.getTime() + 30 * 60000) < selectedDate) {
+                                                opt.value = selectedDate.getTime();
+                                                opt.innerHTML = timeRangeObj[f].time;
+                                                select.appendChild(opt);
+                                            }
+                                        } else {
+                                            opt.value = selectedDate.getTime();
+                                            opt.innerHTML = timeRangeObj[f].time;
+                                            select.appendChild(opt);
+                                        }
+
+                                    }
+                                    fromTime{{ n.reservation.id }}.replaceChild(select, fromTime{{ n.reservation.id }}.childNodes[0]);
+                                }
+
+
+                                //Populate To Time of reservation:
+                                function getToTime{{ n.reservation.id }}() {
+                                    var fromTimeStamp = document.getElementById('fromTimeRangeSelectElement{{ n.reservation.id }}');
+                                    var fromTime = new Date(parseInt(fromTimeStamp.value));
+                                    document.getElementById('#toTimeRangeSelect{{ n.reservation.id }}').removeAttribute("hidden");
+                                    let select = document.createElement('select');
+                                    select.setAttribute("class", "form-control")
+                                    select.setAttribute("id", "toTimeRangeSelectElement{{ n.reservation.id }}")
+                                    select.setAttribute("name", "toDate");
+                                    select.setAttribute("onchange", "getTables{{ n.reservation.id }}()");
+
+                                    var count = 0;
+                                    for (t in timeRangeObj) {
+                                        var selectedDate = new Date(date{{ n.reservation.id }}.value + " " + timeRangeObj[t].hour + ":00:00");
+                                        var opt = document.createElement('option');
+                                        if ((timeRangeObj[t].hour > fromTime.getHours()) && (count < 5)) {
+                                            opt.value = selectedDate.getTime();
+                                            opt.innerHTML = timeRangeObj[t].time;
+                                            select.appendChild(opt);
+                                            count++;
+                                        }
+                                    }
+                                    toTime{{ n.reservation.id }}.replaceChild(select, toTime{{ n.reservation.id }}.childNodes[0]);
+                                }
+
+                                function getTables{{ n.reservation.id }}() {
+                                    var fromTimeStamp = document.getElementById('fromTimeRangeSelectElement{{ n.reservation.id }}');
+                                    var fromTime = new Date(parseInt(fromTimeStamp.value));
+                                    var toTimeStamp = document.getElementById('toTimeRangeSelectElement{{ n.reservation.id }}');
+                                    var toTime = new Date(parseInt(toTimeStamp.value));
+                                    document.getElementById('#tableSelect{{ n.reservation.id }}').removeAttribute("hidden");
+                                    console.log(fromTime, toTime)
+                                    let select = document.createElement('select');
+                                    select.setAttribute("class", "form-control")
+                                    select.setAttribute("id", "tableSelectElement{{ n.reservation.id }}")
+                                    select.setAttribute("name", "toDate");
+                                    {#select.setAttribute("onchange", "getTables{{ n.reservation.id }}()");#}
+                                    console.log(rsvpObj)
+                                    for (r in rsvpObj) {
+                                        var opt = document.createElement('option');
+                                        if () {
+                                            opt.value = selectedDate.getTime();
+                                            opt.innerHTML = timeRangeObj[t].time;
+                                            select.appendChild(opt);
+                                            count++;
+                                        }
+                                    }
+
+                                }
+
+                                {#var result{{ n.reservation.id }} = {{ tables }};#}
+                                {##}
+                                {#var $table{{ n.reservation.id }} = $("#table{{ n.reservation.id }}");#}
+                                {#$.each(result{{ n.reservation.id }}, function () {#}
+                                {#    $table{{ n.reservation.id }}.append($("<option />").val(this.id).text(this.tableName));#}
+                            </script>
                         </form>
                     </div>
                     <div class="modal-footer">
