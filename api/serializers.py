@@ -102,10 +102,13 @@ class TableReservationDateSerializer(serializers.ModelSerializer):
             'id',
             'startDate',
             'endDate',
-            'user',
-            'cancelled',
+            'groupSize',
+            'confirmation',
+            'table',
             'addedTime',
-            'confirmation'
+            'cancelled',
+            'success',
+            'tableReleased'
         ]
 
 
@@ -212,4 +215,6 @@ class ReservationsByUserSerializer(serializers.ModelSerializer):
             'table',
             'addedTime',
             'cancelled',
+            'success',
+            'tableReleased'
         ]
