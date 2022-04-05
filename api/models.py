@@ -180,6 +180,7 @@ class TableReservationDates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     confirmation = models.BooleanField(default=0)
     addedTime = models.DateTimeField(auto_now=True)
+    modifiedTime = models.DateTimeField(null=True)
     cancelled = models.BooleanField(default=0)
     success = models.BooleanField(default=0)
     remarks = models.CharField(max_length=255, null=True, blank=True)

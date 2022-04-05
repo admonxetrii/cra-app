@@ -80,8 +80,7 @@ def reservations(request):
     current_datetime = utc.localize(now)
     for r in res:
         rsvp_date = r.startDate
-        print(rsvp_date)
-        if r.confirmation:
+        if r.confirmation and not r.cancelled:
             fourty_five_min = datetime.timedelta(minutes=45)
             print(current_datetime, fourty_five_min)
             rsvp_cancel_time = rsvp_date + fourty_five_min
@@ -89,7 +88,7 @@ def reservations(request):
                 r.cancelled = True
                 r.cancelled_reason = "USER_DIDNT_ARRIVED"
                 r.save()
-                print("User didn't arrived so cancelled")
+                print(r.table.tableName, "User didn't arrived so cancelled")
         elif not r.cancelled and not r.confirmation:
             thirty_minute = datetime.timedelta(minutes=30)
             print(current_datetime, rsvp_date, thirty_minute)
@@ -119,11 +118,12 @@ def reservations(request):
                 if r.confirmation:
                     confirmed_reservations.append(r)
                 else:
-                    maxDate = r.startDate + datetime.timedelta(days=10)
+                    maxDate = datetime.datetime.now() + datetime.timedelta(days=10)
                     fromTime = (r.startDate + datetime.timedelta(hours=5, minutes=45)).strftime('%I:%M %p')
                     toTime = (r.endDate + datetime.timedelta(hours=5, minutes=45)).strftime('%I:%M %p')
                     newR = {
                         'date': r.startDate.strftime('%Y-%m-%d'),
+                        'minDate': datetime.datetime.now().strftime('%Y-%m-%d'),
                         'maxDate': str(maxDate).split(" ")[0],
                         'fromTime': fromTime,
                         'toTime': toTime,
@@ -141,7 +141,8 @@ def reservations(request):
     for t in tables:
         data = {
             'id': t.id,
-            'table': t.tableName
+            'table': t.tableName,
+            'seatCap': t.seatCapacity
         }
         tables_object.append(data)
 
@@ -161,9 +162,8 @@ def reservations(request):
     timeRange = []
     for a in range(0, difference + 1):
         timeFormat = openTime + datetime.timedelta(hours=a)
-        print(timeFormat.strftime('%H'))
         timeRangeObj = {
-            'id': a+1,
+            'id': a + 1,
             'time': timeFormat.strftime("%I:%M %p"),
             'hour': int(timeFormat.strftime(("%H"))),
             'min': int(timeFormat.strftime(("%M")))
@@ -189,14 +189,20 @@ def reservations(request):
 
 @login_required(login_url='signin')
 def approve_reservation(request, id):
-    date = request.POST.get('date')
-    fromTime = request.POST.get('fromTime')
-    toTime = request.POST.get('toTime')
-    table = request.POST.get('table')
-    groupSize = request.POST.get('groupSize')
+    modified = int(request.POST.get('modified'))
     remarks = request.POST.get('remarks')
     rsvp_obj = TableReservationDates.objects.get(id=id)
+    if modified != 0:
+        fromTime = request.POST.get('tmpDate')
+        toTime = request.POST.get('toDate')
+        table = request.POST.get('table')
+        groupSize = request.POST.get('groupSize')
+        rsvp_obj.startDate = datetime.datetime.fromtimestamp(int(fromTime) / 1000)
+        rsvp_obj.endDate = datetime.datetime.fromtimestamp(int(toTime) / 1000)
+        rsvp_obj.table = RestaurantTable.objects.get(id=table)
+        rsvp_obj.groupSize = groupSize
     rsvp_obj.confirmation = 1
+    rsvp_obj.modifiedTime = datetime.datetime.now()
     rsvp_obj.remarks = remarks
     rsvp_obj.save()
     return redirect('reservations')

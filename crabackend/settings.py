@@ -100,9 +100,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cra_db',
         'USER': 'root',
-        'PASSWORD': 'nouseofit',
+        'PASSWORD': '231Bac564#',
         'HOST': 'localhost',
-        'PORT': '3307',
+        'PORT': '3306',
     }
 }
 

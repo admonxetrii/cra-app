@@ -192,31 +192,29 @@
                                     <input type="date" id="reservationDate{{ n.reservation.id }}"
                                            onchange="getReservationTime{{ n.reservation.id }}()" value="{{ n.date }}"
                                            class="form-control"
-                                           placeholder="dd/mm/yyyy" min="{{ n.date }}" max="{{ n.maxDate }}">
+                                           placeholder="dd/mm/yyyy" min="{{ n.minDate }}" max="{{ n.maxDate }}">
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <div class="col-sm-6" id="#fromTimeRangeSelect{{ n.reservation.id }}" hidden>
-                                    <h5>From Time: <span class="text-danger">*</span></h5>
-                                    <div class="input-group" id="#fromTimeInit{{ n.reservation.id }}">
-                                        <select class="form-control" disabled>
-                                            <option value="{{ n.fromTime }}" selected>{{ n.fromTime }}</option>
-                                        </select>
-                                    </div>
-                                    <div class="input-group" id="fromTime{{ n.reservation.id }}">
-
-                                    </div>
+                            <div class="form-group" id="#fromTimeRangeSelect{{ n.reservation.id }}" hidden>
+                                <h5>From Time: <span class="text-danger">*</span></h5>
+                                <div class="input-group" id="#fromTimeInit{{ n.reservation.id }}">
+                                    <select class="form-control" disabled>
+                                        <option value="{{ n.fromTime }}" selected>{{ n.fromTime }}</option>
+                                    </select>
                                 </div>
-                                <div class="col-sm-6" id="#toTimeRangeSelect{{ n.reservation.id }}" hidden>
-                                    <h5>To Time: <span class="text-danger">*</span></h5>
-                                    <div class="input-group" id="#toTimeInit{{ n.reservation.id }}">
-                                        <select class="form-control" disabled>
-                                            <option value="{{ n.toTime }}" selected>{{ n.toTime }}</option>
-                                        </select>
-                                    </div>
-                                    <div class="input-group" id="toTime{{ n.reservation.id }}">
+                                <div class="input-group" id="fromTime{{ n.reservation.id }}">
 
-                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" id="#toTimeRangeSelect{{ n.reservation.id }}" hidden>
+                                <h5>To Time: <span class="text-danger">*</span></h5>
+                                <div class="input-group" id="#toTimeInit{{ n.reservation.id }}">
+                                    <select class="form-control" disabled>
+                                        <option value="{{ n.toTime }}" selected>{{ n.toTime }}</option>
+                                    </select>
+                                </div>
+                                <div class="input-group" id="toTime{{ n.reservation.id }}">
+
                                 </div>
                             </div>
                             <div class="form-group" id="#tableSelect{{ n.reservation.id }}" hidden>
@@ -269,15 +267,17 @@
                                 <h5>Remarks:</h5>
                                 <textarea class="form-control" name="remarks"></textarea>
                             </div>
+                            <input type="text" id="mod{{ n.reservation.id }}" name="modified" value="0" hidden/>
+                            <input type="text" id="tmpFromDate{{ n.reservation.id }}" name="tmpDate" hidden/>
                             {% csrf_token %}
                             <button type="submit" id="#approveButton{{ n.reservation.id }}"
                                     class="btn btn-info btn-block waves-effect waves-light">Approve
                             </button>
                             <script>
-                                console.log("=========For ID: {{ n.reservation.id }}=============")
                                 var date{{ n.reservation.id }} = document.getElementById('reservationDate{{ n.reservation.id }}');
                                 var fromTime{{ n.reservation.id }} = document.getElementById('fromTime{{ n.reservation.id }}');
                                 var toTime{{ n.reservation.id }} = document.getElementById('toTime{{ n.reservation.id }}');
+                                var table{{ n.reservation.id }} = document.getElementById('#table{{ n.reservation.id }}');
 
                                 //Date Calculation for current day
                                 var curentdate = new Date();
@@ -324,8 +324,13 @@
                                     let select = document.createElement('select');
                                     select.setAttribute("class", "form-control")
                                     select.setAttribute("id", "fromTimeRangeSelectElement{{ n.reservation.id }}")
-                                    select.setAttribute("name", "fromDate");
+                                    select.setAttribute("name", "rsvpFromDate");
                                     select.setAttribute("onchange", "getToTime{{ n.reservation.id }}()");
+                                    var opt1 = document.createElement('option');
+                                    opt1.innerHTML = "Select Time*";
+                                    opt1.setAttribute("disabled", "true");
+                                    opt1.setAttribute("selected", "true");
+                                    select.append(opt1);
                                     for (f in timeRangeObj) {
                                         var selectedDate = new Date(date{{ n.reservation.id }}.value + " " + timeRangeObj[f].hour + ":00:00");
                                         var opt = document.createElement('option');
@@ -349,6 +354,7 @@
                                 //Populate To Time of reservation:
                                 function getToTime{{ n.reservation.id }}() {
                                     var fromTimeStamp = document.getElementById('fromTimeRangeSelectElement{{ n.reservation.id }}');
+                                    document.getElementById('tmpFromDate{{ n.reservation.id }}').value = fromTimeStamp.value;
                                     var fromTime = new Date(parseInt(fromTimeStamp.value));
                                     document.getElementById('#toTimeRangeSelect{{ n.reservation.id }}').removeAttribute("hidden");
                                     let select = document.createElement('select');
@@ -356,7 +362,11 @@
                                     select.setAttribute("id", "toTimeRangeSelectElement{{ n.reservation.id }}")
                                     select.setAttribute("name", "toDate");
                                     select.setAttribute("onchange", "getTables{{ n.reservation.id }}()");
-
+                                    var opt1 = document.createElement('option');
+                                    opt1.innerHTML = "Select Time*";
+                                    opt1.setAttribute("selected", "true");
+                                    opt1.setAttribute("disabled", "true");
+                                    select.append(opt1);
                                     var count = 0;
                                     for (t in timeRangeObj) {
                                         var selectedDate = new Date(date{{ n.reservation.id }}.value + " " + timeRangeObj[t].hour + ":00:00");
@@ -381,26 +391,44 @@
                                     let select = document.createElement('select');
                                     select.setAttribute("class", "form-control")
                                     select.setAttribute("id", "tableSelectElement{{ n.reservation.id }}")
-                                    select.setAttribute("name", "toDate");
+                                    select.setAttribute("name", "table");
+                                    var opt1 = document.createElement('option');
+                                    opt1.innerHTML = "Select Table*";
+                                    opt1.setAttribute("selected", "true");
+                                    opt1.setAttribute("disabled", "true");
+                                    select.append(opt1);
                                     {#select.setAttribute("onchange", "getTables{{ n.reservation.id }}()");#}
                                     console.log(rsvpObj)
-                                    for (r in rsvpObj) {
+                                    for (t in tableObj) {
                                         var opt = document.createElement('option');
-                                        if () {
-                                            opt.value = selectedDate.getTime();
-                                            opt.innerHTML = timeRangeObj[t].time;
-                                            select.appendChild(opt);
-                                            count++;
+                                        for (r in rsvpObj) {
+                                            var startDate = new Date(rsvpObj[r].startDate);
+                                            var endDate = new Date(rsvpObj[r].endDate);
+                                            if (((fromTime.getTime() <= startDate.getTime()) && (toTime.getTime() > startDate.getTime())) || ((fromTime.getTime() < endDate.getTime()) && (toTime.getTime() >= endDate.getTime()))) {
+                                                if (tableObj[t].id === rsvpObj[r].table) {
+                                                    if (!rsvpObj[r].cancelled) {
+                                                        opt.value = tableObj[t].id;
+                                                        opt.setAttribute("disabled", "true");
+                                                        opt.setAttribute("class", "text-danger");
+                                                        opt.innerHTML = `${tableObj[t].table} is booked for that time.`;
+                                                        select.appendChild(opt);
+                                                    } else {
+                                                        opt.value = tableObj[t].id;
+                                                        opt.innerHTML = `${tableObj[t].table} - Seat for ${tableObj[t].seatCap}.`;
+                                                        select.appendChild(opt);
+                                                    }
+                                                }
+                                            } else {
+                                                opt.value = tableObj[t].id;
+                                                opt.innerHTML = `${tableObj[t].table} - Seat for ${tableObj[t].seatCap}.`;
+                                                select.appendChild(opt);
+                                            }
                                         }
                                     }
-
+                                    table{{ n.reservation.id }}.replaceChild(select, table{{ n.reservation.id }}.childNodes[0]);
+                                    document.getElementById('mod{{ n.reservation.id }}').value = 1;
+                                    document.getElementById('#approveButton{{ n.reservation.id }}').removeAttribute("disabled");
                                 }
-
-                                {#var result{{ n.reservation.id }} = {{ tables }};#}
-                                {##}
-                                {#var $table{{ n.reservation.id }} = $("#table{{ n.reservation.id }}");#}
-                                {#$.each(result{{ n.reservation.id }}, function () {#}
-                                {#    $table{{ n.reservation.id }}.append($("<option />").val(this.id).text(this.tableName));#}
                             </script>
                         </form>
                     </div>
