@@ -152,7 +152,7 @@ class MenuDetailAPIView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, gener
 
 class MenuCategoryListBasedOnRestaurantAPIView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permissions_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = MenuCategoryListBasedOnRestaurant
 
     def get_queryset(self, *args, **kwargs):
@@ -173,9 +173,22 @@ class RestaurantBasedOnTypesAPIView(generics.ListAPIView):
         return Restaurant.objects.filter(restaurantType__id=restaurantType_id)
 
 
+class CalculateRecommendation(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            users = CustomUser.objects.all()
+            print(users)
+            return Response({"message": "creation failed"})
+        except Exception as e:
+            print(e)
+
+
 class CheckSimilarityOfRestaurants(APIView):
     authentication_classes = [JWTAuthentication]
-    permissions_classes = [permissions.IsAuthenticated]
+    permissions = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         try:
@@ -193,8 +206,17 @@ class CheckSimilarityOfRestaurants(APIView):
                     elif rA.id == rB.id:
                         continue
                     else:
-                        similarityPercentage = descriptionCosineSimilarity(rA.description, rB.description)
-                        if similarityPercentage >= 0.15:
+                        rATags_obj = rA.tags.all()
+                        rBTags_obj = rB.tags.all()
+                        rATags = []
+                        rBTags = []
+                        for rA_obj in rATags_obj:
+                            rATags.append(rA_obj.tags)
+                        for rB_obj in rBTags_obj:
+                            rBTags.append(rB_obj.tags)
+
+                        similarityPercentage = descriptionCosineSimilarity(rATags, rBTags)
+                        if similarityPercentage >= 0.45:
                             similarity = similarityCalculation.objects.create(restaurantA=rA, restaurantB=rB,
                                                                               similarityPercent=float(
                                                                                   similarityPercentage))
@@ -212,8 +234,18 @@ class CheckSimilarityOfRestaurants(APIView):
             for sc in similarityCalculationObjects:
                 rA = sc.restaurantA
                 rB = sc.restaurantB
-                similarityPercentage = descriptionCosineSimilarity(rA.description, rB.description)
-                if similarityPercentage >= 0.15:
+
+                rATags_obj = rA.tags.all()
+                rBTags_obj = rB.tags.all()
+                rATags = []
+                rBTags = []
+                for rA_obj in rATags_obj:
+                    rATags.append(rA_obj.tags)
+                for rB_obj in rBTags_obj:
+                    rBTags.append(rB_obj.tags)
+
+                similarityPercentage = descriptionCosineSimilarity(rATags, rBTags)
+                if similarityPercentage >= 0.45:
                     sc.similarityPercent = similarityPercentage
                     sc.save()
                 else:
@@ -268,7 +300,7 @@ class GetSimilarRestaurants(generics.ListAPIView):
 
 class TableListBasedOnRestaurantAPIView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permissions_classes = [permissions.IsAuthenticated]
+    permissions = [permissions.IsAuthenticated]
     serializer_class = FloorLevelListBasedOnRestaurant
 
     def get_queryset(self, *args, **kwargs):

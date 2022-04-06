@@ -3,7 +3,7 @@ from .views import RestaurantAPIView, RestaurantAPIDetailView, MenuCategoryAPIVi
     MenuAPIView, MenuDetailAPIView, MenuCategoryListBasedOnRestaurantAPIView, RestaurantCategoryAPIView, \
     RestaurantBasedOnTypesAPIView, CheckSimilarityOfRestaurants, GetSimilarRestaurants, \
     TableListBasedOnRestaurantAPIView, ConfirmTableBookingAPIView, ReservedTableListByUserAPIView, \
-    GetSimilarityPercentageSerializer, FavouriteRestaurant, IsFavouriteAPI, EditFavourite
+    GetSimilarityPercentageSerializer, FavouriteRestaurant, IsFavouriteAPI, EditFavourite, CalculateRecommendation
 
 from django.conf.urls.static import static
 from crabackend import settings
@@ -20,6 +20,7 @@ urlpatterns = [
                   path('restaurant/<int:id>/menuList', MenuCategoryListBasedOnRestaurantAPIView.as_view()),
                   path('restaurant/<int:id>/tableList', TableListBasedOnRestaurantAPIView.as_view()),
                   path('restaurant-booking/', ConfirmTableBookingAPIView.as_view()),
+                  path('restaurant-recommendation/', CalculateRecommendation.as_view()),
                   path('restaurant-similarity/', CheckSimilarityOfRestaurants.as_view()),
                   path('restaurant-similarities/<int:id>', GetSimilarRestaurants.as_view()),
                   path('favourite-restaurants/<str:username>', FavouriteRestaurant.as_view()),

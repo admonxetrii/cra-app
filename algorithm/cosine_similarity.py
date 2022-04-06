@@ -3,7 +3,7 @@ import math
 
 # split the sentences and count the repeated words
 def wordCountMap(sentence):
-    words = sentence.rsplit(' ')
+    words = sentence
     wordCount = {}
     for word in words:
         if word in wordCount.keys():
@@ -48,9 +48,10 @@ def cosine_similarity(vecA, vecB):
     return dotProduct(vecA, vecB) / (magnitude(vecA) * magnitude(vecB))
 
 
-def descriptionCosineSimilarity(descriptionA, descriptionB):
-    wordCountDescA = wordCountMap(descriptionA)
-    wordCountDescB = wordCountMap(descriptionB)
+def descriptionCosineSimilarity(tagsA, tagsB):
+    wordCountDescA = wordCountMap(tagsA)
+    wordCountDescB = wordCountMap(tagsB)
+    print(wordCountDescA, wordCountDescB)
     dict = {}
     addWordsToDisctionary(wordCountDescA, dict)
     addWordsToDisctionary(wordCountDescB, dict)
