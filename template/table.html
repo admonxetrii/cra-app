@@ -28,8 +28,8 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="text-dark font-weight-bold h3 mb-0">Reserved Tables <br> <span id="rtbl"
-                                                                                               class="text-warning"></span>
+                    <div class="text-dark font-weight-bold h3 mb-0">Today's RSVP <br> <span id="rtbl"
+                                                                                            class="text-warning"></span>
                     </div>
                 </div>
             </div>
@@ -67,24 +67,41 @@
             <div class="card-body">
                 <div class="row align-items-center no-gutters">
                     <div class="col mr-2">
-                        <!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->
-                        <a href="#" class="col-md-6 col-xl-3 mb-4">
-                            {#                                <a href="{% url 'tableorder' t.id %}" class="col-md-6 col-xl-3 mb-4" >#}
+                        {#                        <!--                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>{{i.title}}</span></div>-->#}
+                        <a href="#" class="col-md-6 col-xl-3 mb-4" data-toggle="modal"
+                           data-target="#reservations{{ t.id }}">
+                            {#                                                            <a href="{% url 'tableorder' t.id %}" class="col-md-6 col-xl-3 mb-4" >#}
                             <div class="text-dark font-weight-bold h2 mb-0">
                                 <span>{{ t.tableName }} </span>
                             </div>
                         </a>
+                        <script>var rsvp = 0;</script>
                         {% for r in rsvp %}
                             {% if r.table.id == t.id %}
-                                Reservations Available!! {{ r.table.tableName }} {{ r.id }}
+                                <script>rtbl += 1;</script>
+                                {% if not r.success %}
+                                    <script>rsvp++;</script>
+                                {% endif %}
                             {% endif %}
                         {% endfor %}
                     </div>
                     {% if t.isOccupied == 1 %}
-
-                        <button class="btn btn-outline-danger btn-sm" data-toggle="modal"
-                                data-target="#change{{ t.id }}"><i class="fa fa-edit"></i> Change
-                        </button>
+                        {% for r in rsvp %}
+                            {% if r.table.id and r.success and not r.tableReleased %}
+                                <a class="btn btn-outline-danger btn-sm"
+                                   onclick="confirm('Are you sure want to release??')"
+                                   href="{% url 'release-reservation' r.id %}"><i
+                                        class="fa fa-check-circle"></i> Release
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span id="#rsvp{{ t.id }}" class="text-muted"></span>
+                        <script>
+                            if (rsvp > 0) {
+                                document.getElementById('#rsvp{{ t.id }}').innerHTML = `${rsvp} Reservations available.`;
+                            }
+                        </script>
                     {% endif %}
                 </div>
             </div>
@@ -145,60 +162,73 @@
 </div>
     <hr>
     <div class="container-fluid">
-        {% if request.user.is_staff %}
-            {#        <button class="btn btn-danger" data-toggle="modal" data-target="#merge"><i class="fas fa-handshake"></i> Merge Table</button>#}
-            <a href="#">
-                <button class="btn btn-info"><i class="fa fa-exclamation-triangle"></i> Reserved Table</button>
-            </a>
-        {% endif %}
+
     </div>
 
     <!--model for changing table-->
     {% for t in table %}
-
-        <div class="modal fade" id="change{{ t.id }}" tabindex="-1" role="dialog"
+        <div class="modal fade" id="reservations{{ t.id }}" tabindex="-1" role="dialog"
              aria-labelledby="exampleModalCenterTitle"
              aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Change Table <b
-                                class="text-danger">{{ t.title }}</b></h5>
+                        <h5 class="modal-title" id="exampleModalLongTitle">Reservations for <b
+                                class="text-danger">{{ t.tableName }}</b></h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form method="post" action="#" novalidate>
-                            <div class="form-group">
-                                <h5>Select New Table: <span class="text-danger">*</span></h5>
-                                <div class="controls">
-                                    <select name="newTable" id="cselect" required
-                                            data-validation-required-message="Please Select Table" class="form-control"
-                                            onchange="getVal{{ t.id }}(this.id);">
-                                        <option value="" selected>---------</option>
-                                        {% for t in table %}
-                                            {% if t.occupied == 0 and t.reserved == 0 %}
-                                                <option value="{{ t.id }}">{{ t.title }}</option>
-                                            {% endif %}
-                                            <script>
-                                                var newt{{ t.id }} = {{t.title}};
-                                            </script>
-                                        {% endfor %}
-                                    </select>
-
-                                </div>
-                            </div>
-
-                            {{ form.as_p }}
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-danger btn-block waves-effect waves-light"
-                                        onsubmit="return confirm('Are you sure want to change this table?')"><i
-                                        class="fa fa-chain"></i> Change Table
-                                </button>
-                            </div>
-                        </form>
+                        <div class="table-responsive m-t-40">
+                            <table id="myTable2" class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Pax</th>
+                                    <th>Time</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for r in rsvp %}
+                                    {% if r.table.id == t.id %}
+                                        {% if not r.success  %}
+                                            <tr>
+                                                <td>{{ r.groupSize }}</td>
+                                                <td class="align-middle" width="30%">
+                                                <span
+                                                        class="font-weight-bold">{{ r.startDate|date:"h:i A" }}</span>
+                                                    to
+                                                    <span class="font-weight-bold">{{ r.endDate|date:"h:i A" }}</span>
+                                                </td>
+                                                <td class="align-middle">{{ r.user.first_name }} {{ r.user.last_name }}</td>
+                                                <td class="align-middle">{{ r.user.phone_number }}</td>
+                                                {% if current_time < r.startDate %}
+                                                    <td class="align-middle">Not time yet</a>
+                                                    </td>
+                                                {% else %}
+                                                    <td class="align-middle"><a
+                                                            class="btn btn-sm btn-rounded btn-outline-danger"
+                                                            href="{% url 'accept-reservation' r.id %}"
+                                                            onclick="confirm('Are you sure want to accept this reservation?')">Accept</a>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <h3 class="text-danger font-weight-bold" id="#notFound{{ t.id }}"></h3>
+                                            </tr>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                <script>
+                                    document.getElementById('#notFound{{ t.id }}').innerHTML = "No Reservations for today!!"
+                                </script>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

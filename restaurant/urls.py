@@ -13,4 +13,6 @@ urlpatterns = [
                   path('reservations/', views.reservations, name='reservations'),
                   path('approve-reservation/<int:id>', views.approve_reservation, name='approve-reservation'),
                   path('cancel-reservation/<int:id>', views.cancel_reservation, name='cancel-reservation'),
+                  path('accept-reservation/<int:id>', views.reservations_accept, name='accept-reservation'),
+                  path('release-reservation/<int:id>', views.reservation_release, name='release-reservation'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

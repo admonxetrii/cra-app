@@ -65,15 +65,49 @@ def tables(request):
     restaurant = restaurant_obj(request)
     data1 = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant)
     data2 = RestaurantFloorLevel.objects.filter(restaurant=restaurant)
-    endTime = str(datetime.datetime.now()).split(" ")[0]+" "+str(restaurant.closingTime)
+    endTime = str(datetime.datetime.now()).split(" ")[0] + " " + str(restaurant.closingTime)
     endDate = utc.localize(datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S'))
-    today_rsvp = TableReservationDates.objects.filter(confirmation=True, cancelled=False, endDate__lt=endDate)
+    current_time = utc.localize(datetime.datetime.now() + datetime.timedelta(minutes=30))
+    today_rsvp = TableReservationDates.objects.filter(confirmation=True, cancelled=False, endDate__lt=endDate).order_by(
+        'startDate')
     context = {
         'table': data1,
         'floor': data2,
-        'rsvp': today_rsvp
+        'rsvp': today_rsvp,
+        'current_time': current_time
     }
     return render(request, 'table.html', context)
+
+@login_required(login_url='signin')
+def reservation_release(request, id):
+    rsvp = TableReservationDates.objects.get(id=id)
+    table = RestaurantTable.objects.get(id=rsvp.table.id)
+    if rsvp.table.isOccupied:
+        table.isOccupied = False
+        rsvp.tableReleased = True
+        rsvp.modifiedTime = utc.localize(datetime.datetime.now())
+        rsvp.save()
+        table.save()
+        messages.add_message(request, messages.SUCCESS, f"Table {table.tableName} is released!!!")
+    else:
+        messages.add_message(request, messages.ERROR, "Table cannot be released!!!")
+    return redirect('table')
+
+
+@login_required(login_url='signin')
+def reservations_accept(request, id):
+    rsvp = TableReservationDates.objects.get(id=id)
+    table = RestaurantTable.objects.get(id=rsvp.table.id)
+    if not rsvp.table.isOccupied:
+        table.isOccupied = True
+        rsvp.success = True
+        rsvp.modifiedTime = utc.localize(datetime.datetime.now())
+        rsvp.save()
+        table.save()
+        messages.add_message(request, messages.SUCCESS, "Table's reservation is accepted!!!")
+    else:
+        messages.add_message(request, messages.ERROR, "Table is currently occupied, release it first!!!")
+    return redirect('table')
 
 
 @login_required(login_url='signin')
@@ -121,7 +155,7 @@ def reservations(request):
         for r in res:
             if r.cancelled:
                 cancelled.append(r)
-            elif r.success:
+            elif r.tableReleased:
                 success_reservation.append(r)
             elif r.startDate > current_datetime:
                 maxDate = datetime.datetime.now() + datetime.timedelta(days=10)

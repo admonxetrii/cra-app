@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$4o*84m$ny7*n-_6t%xvups59kg@8qi&0m4*!9lpt9vz1diqa+
 DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.1.94', 'localhost', '127.0.0.1', '192.168.0.108', '192.168.150.161', '192.168.254.9',
-                 '192.168.254.6','192.168.43.152', '192.168.1.84']
+                 '192.168.254.6', '192.168.43.152', '192.168.1.84']
 
 # Application definition
 
@@ -77,7 +77,7 @@ CORS_ALLOWED_ORIGINS = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'template')],
+        'DIRS': [os.path.join(BASE_DIR, 'template')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,9 +100,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cra_db',
         'USER': 'root',
-        'PASSWORD': 'nouseofit',
+        'PASSWORD': '231Bac564#',
         'HOST': 'localhost',
-        'PORT': '3307',
+        'PORT': '3306',
     }
 }
 
