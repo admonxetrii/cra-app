@@ -62,11 +62,16 @@ def dashboard(request):
 
 @login_required(login_url='signin')
 def tables(request):
-    data1 = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant_obj(request))
-    data2 = RestaurantFloorLevel.objects.filter(restaurant=restaurant_obj(request))
+    restaurant = restaurant_obj(request)
+    data1 = RestaurantTable.objects.filter(floorLevel__restaurant=restaurant)
+    data2 = RestaurantFloorLevel.objects.filter(restaurant=restaurant)
+    endTime = str(datetime.datetime.now()).split(" ")[0]+" "+str(restaurant.closingTime)
+    endDate = utc.localize(datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S'))
+    today_rsvp = TableReservationDates.objects.filter(confirmation=True, cancelled=False, endDate__lt=endDate)
     context = {
         'table': data1,
-        'floor': data2
+        'floor': data2,
+        'rsvp': today_rsvp
     }
     return render(request, 'table.html', context)
 
@@ -85,6 +90,8 @@ def reservations(request):
             print(current_datetime, fourty_five_min)
             rsvp_cancel_time = rsvp_date + fourty_five_min
             if current_datetime > rsvp_cancel_time:
+                if r.success:
+                    continue
                 r.cancelled = True
                 r.cancelled_reason = "USER_DIDNT_ARRIVED"
                 r.save()
@@ -102,7 +109,7 @@ def reservations(request):
     current_datetime = utc.localize(now)
     new_reservations = []
     confirmed_reservations = []
-    old_reservations = []
+    success_reservation = []
     cancelled = []
 
     openTime = datetime.datetime.strptime(str(restaurant.openingTime), '%H:%M:%S')
@@ -114,25 +121,25 @@ def reservations(request):
         for r in res:
             if r.cancelled:
                 cancelled.append(r)
-            elif r.startDate > current_datetime:
-                if r.confirmation:
-                    confirmed_reservations.append(r)
-                else:
-                    maxDate = datetime.datetime.now() + datetime.timedelta(days=10)
-                    fromTime = (r.startDate + datetime.timedelta(hours=5, minutes=45)).strftime('%I:%M %p')
-                    toTime = (r.endDate + datetime.timedelta(hours=5, minutes=45)).strftime('%I:%M %p')
-                    newR = {
-                        'date': r.startDate.strftime('%Y-%m-%d'),
-                        'minDate': datetime.datetime.now().strftime('%Y-%m-%d'),
-                        'maxDate': str(maxDate).split(" ")[0],
-                        'fromTime': fromTime,
-                        'toTime': toTime,
-                        'table': r.table.tableName,
-                        'reservation': r
-                    }
-                    new_reservations.append(newR)
             elif r.success:
-                old_reservations.append(r)
+                success_reservation.append(r)
+            elif r.startDate > current_datetime:
+                maxDate = datetime.datetime.now() + datetime.timedelta(days=10)
+                fromTime = (r.startDate + datetime.timedelta(hours=5, minutes=45)).strftime('%I:%M %p')
+                toTime = (r.endDate + datetime.timedelta(hours=5, minutes=45)).strftime('%I:%M %p')
+                newR = {
+                    'date': r.startDate.strftime('%Y-%m-%d'),
+                    'minDate': datetime.datetime.now().strftime('%Y-%m-%d'),
+                    'maxDate': str(maxDate).split(" ")[0],
+                    'fromTime': fromTime,
+                    'toTime': toTime,
+                    'table': r.table.tableName,
+                    'reservation': r
+                }
+                if r.confirmation:
+                    confirmed_reservations.append(newR)
+                else:
+                    new_reservations.append(newR)
     except Exception as e:
         print(e)
     floorLevels = RestaurantFloorLevel.objects.filter(restaurant=restaurant)
@@ -175,7 +182,7 @@ def reservations(request):
 
     context = {
         'new': new_reservations,
-        'old': old_reservations,
+        'success': success_reservation,
         'confirmed': confirmed_reservations,
         'cancelled': cancelled,
         'tables': tables,

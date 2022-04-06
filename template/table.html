@@ -2,42 +2,6 @@
 {% block 'title' %} Tables {% endblock %}
 {% load static %}
 {% block 'script' %}
-    <script type="text/javascript">
-        function populate(s1, s2) {
-            var sel1 = document.getElementById(s1);
-            var sel2 = document.getElementById(s2);
-            sel2.innerHTML = "Select Table 2";
-            var optionArray = [{% for t in table %}{% if t.reserved == 0 and t.merged == 0 %}"{{ t.id }}|{{ t.title }}", {% endif %}{% endfor %}];
-            for (var option in optionArray) {
-                var pair = optionArray[option].split("|");
-                var newOption = document.createElement("option");
-                if (pair[0] == sel1.value) {
-                    pair[0] = "";
-                    pair[1] = "--------";
-                    newOption.setAttribute('selected', "");
-                }
-                newOption.value = pair[0];
-                newOption.innerHTML = pair[1];
-                sel2.options.add(newOption);
-            }
-        }
-
-        function validateSel(s1, s2) {
-            var s1 = document.getElementById(s1).value;
-            var s2 = document.getElementById(s2).value;
-            var err = true;
-            if (s1 == "") {
-                document.getElementById('msgSel1').innerHTML = "Please Select Table";
-                err = false;
-            }
-            if (s2 == "") {
-                document.getElementById('msgSel2').innerHTML = "Please Select Table";
-                err = false;
-            }
-            return err;
-        }
-    </script>
-
 {% endblock %}
 {% block 'body' %}
     <div class="container-fluid">
@@ -110,23 +74,11 @@
                                 <span>{{ t.tableName }} </span>
                             </div>
                         </a>
-                        {% if request.user.is_superuser %}
-                            <div class=" h6 mb-0">
-                                <button class="btn btn-info btn-sm" data-toggle="modal"
-                                        data-target="#editTable{{ t.id }}"><i
-                                        class="fa fa-edit"></i>
-                                    Edit
-                                </button>
-                                |
-                                {#                                    <a href="{% url 'deleteTable' t.id %}"><button class="btn btn-danger btn-sm" onclick="return confirm('Are you sure want to delete this category?');"><i class="fa fa-trash"></i> Delete</button></a>#}
-                                <a href="#">
-                                    <button class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Are you sure want to delete this category?');">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </button>
-                                </a>
-                            </div>
-                        {% endif %}
+                        {% for r in rsvp %}
+                            {% if r.table.id == t.id %}
+                                Reservations Available!! {{ r.table.tableName }} {{ r.id }}
+                            {% endif %}
+                        {% endfor %}
                     </div>
                     {% if t.isOccupied == 1 %}
 
@@ -139,7 +91,6 @@
             </div>
             </div>
             {% endif %}
-            <script>rtbl = rtbl + 1;</script>
         {% endfor %}
 
     {#{% for mt in merge %}#}
