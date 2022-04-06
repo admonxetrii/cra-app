@@ -60,16 +60,32 @@ class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
 
 class GetTagsAPIView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TagsSerializer
 
     def get_queryset(self):
-        request = self.request
         qs = LikeTags.objects.all()
-        query = request.GET.get('user')
-        if query is not None:
-            qs = LikeTags.objects.filter(customuser__username=query)
         return qs
+
+
+class SaveUserTagsAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            username = request.data.get('username')
+            tags = request.data.get('tags')
+            user_obj = CustomUser.objects.get(username=username)
+            for tag in tags:
+                tags_obj = LikeTags.objects.get(id=tag)
+                user_obj.userTags.add(tags_obj)
+                user_obj.has_tags = True
+                user_obj.save()
+            return Response({"message": "User Tags saved", "status": status.HTTP_200_OK})
+        except Exception as e:
+            print(e)
+            return Response({"error": e, "status": status.HTTP_400_BAD_REQUEST})
 
 
 class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
