@@ -32,7 +32,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_premium_customer',
             'is_restaurant_representative',
             'has_tags',
-            'date_joined'
+            'date_joined',
+            'is_verified'
         ]
 
 
