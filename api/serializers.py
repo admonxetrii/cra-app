@@ -1,7 +1,17 @@
 from rest_framework import serializers
 from api.models import Restaurant, MenuCategory, Menu, RestaurantType, RestaurantTable, RestaurantFloorLevel, \
-    TableReservationDates, similarityCalculation, IsFavourite
+    TableReservationDates, similarityCalculation, IsFavourite, LikeTags
 from accounts.api.serializers import UserProfileSerializer
+
+
+class TagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LikeTags
+        fields = [
+            'id',
+            'tags',
+            'icon',
+        ]
 
 
 class RestaurantCategorySerializer(serializers.ModelSerializer):

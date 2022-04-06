@@ -31,6 +31,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_customer',
             'is_premium_customer',
             'is_restaurant_representative',
+            'has_tags',
             'date_joined'
         ]
 
@@ -41,6 +42,8 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         refresh = self.get_token(self.user)
         token['username'] = self.user.username
         token['is_verified'] = self.user.is_verified
+        token['has_tags'] = self.user.has_tags
+        token['is_password_reset'] = self.user.is_password_reset
         return token
 
 

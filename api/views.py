@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from pip._internal.locations import user_site
 from rest_framework import generics, mixins, permissions, viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,15 +14,30 @@ utc = pytz.timezone(zone="Asia/Kathmandu")
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication, JWTAuthentication
 
 from .models import Restaurant, MenuCategory, Menu, RestaurantType, similarityCalculation, RestaurantFloorLevel, \
-    RestaurantTable, Favourites, IsFavourite
+    RestaurantTable, Favourites, IsFavourite, LikeTags
 from .serializers import RestaurantSerializer, MenuCategorySerializer, MenuSerializer, \
     MenuCategoryListBasedOnRestaurant, RestaurantCategorySerializer, FloorLevelListBasedOnRestaurant, \
-    TableReservationDates, ReservationsByUserSerializer, SimilaritySerializer, IsFavouriteSerializer
+    TableReservationDates, ReservationsByUserSerializer, SimilaritySerializer, IsFavouriteSerializer, TagsSerializer
 
 from algorithm.cosine_similarity import descriptionCosineSimilarity
 
 
 # Create your views here.
+
+class RestaurantCategoryAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RestaurantCategorySerializer
+
+    def get_queryset(self):
+        request = self.request
+        qs = RestaurantType.objects.all()
+        query = request.GET.get()
+        if query is not None:
+            qs = qs.filter(name__icontains=query)
+        return qs
+
+
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -42,24 +58,18 @@ class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
         serializer.save(modifiedBy=self.request.user)
 
 
-class RestaurantCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
+class GetTagsAPIView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = RestaurantCategorySerializer
+    permission_classes = [permissions.AllowAny]
+    serializer_class = TagsSerializer
 
     def get_queryset(self):
         request = self.request
-        qs = RestaurantType.objects.all()
-        query = request.GET.get('q')
+        qs = LikeTags.objects.all()
+        query = request.GET.get('user')
         if query is not None:
-            qs = qs.filter(name__icontains=query)
+            qs = LikeTags.objects.filter(customuser__username=query)
         return qs
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
-        serializer.save(modifiedBy=self.request.user)
 
 
 class RestaurantAPIDetailView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.RetrieveAPIView):
