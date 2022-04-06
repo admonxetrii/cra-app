@@ -55,6 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_customer = models.BooleanField(default=False)
     is_premium_customer = models.BooleanField(default=False)
     is_restaurant_representative = models.BooleanField(default=False)
+    userTags = models.ManyToManyField('api.LikeTags')
 
     objects = CustomAccountManager()
 

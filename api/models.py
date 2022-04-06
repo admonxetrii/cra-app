@@ -18,6 +18,17 @@ class RestaurantType(models.Model):
         db_table = "RESTAURANT_TYPE_MASTER"
 
 
+class LikeTags(models.Model):
+    tags = models.CharField(max_length=256)
+    icon = models.ImageField(upload_to='likeTags/icons')
+
+    def __str__(self):
+        return self.tags
+
+    class Meta:
+        db_table = "TAGS_MASTER"
+
+
 class Restaurant(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     icon = models.CharField(max_length=20, null=True, blank=True)
@@ -32,6 +43,7 @@ class Restaurant(models.Model):
     description = models.TextField(max_length=1000, null=True, blank=True)
     modifiedDate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     restaurantType = models.ManyToManyField(RestaurantType)
+    tags = models.ManyToManyField(LikeTags)
 
     def __str__(self):
         return self.name
@@ -143,6 +155,11 @@ class similarityCalculation(models.Model):
     restaurantB = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurantB')
     similarityPercent = models.FloatField()
 
+class recommendationCalculation(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    recommendationPercent =models.FloatField()
+
 
 class RestaurantFloorLevel(models.Model):
     floorName = models.CharField(max_length=65, null=True, blank=True)
@@ -197,27 +214,3 @@ class MergeTable(models.Model):
 
     class Meta:
         db_table = "TABLE_MERGE"
-
-
-class LikeTags(models.Model):
-    tags = models.CharField(max_length=256)
-    icon = models.ImageField(upload_to='likeTags/icons')
-
-    class Meta:
-        db_table = "TAGS_MASTER"
-
-
-class UserTags(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
-    tag = models.ForeignKey(LikeTags, on_delete=models.CASCADE, related_name='user_tag')
-
-    class Meta:
-        db_table = "USER_TAGS"
-
-
-class RestaurantTags(models.Model):
-    restaurant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='restaurant')
-    tag = models.ForeignKey(LikeTags, on_delete=models.CASCADE, related_name='restaurant_tag')
-
-    class Meta:
-        db_table = "RESTAURANT_TAGS"

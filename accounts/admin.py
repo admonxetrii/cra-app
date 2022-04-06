@@ -36,7 +36,8 @@ class UserAdminConfig(UserAdmin):
                 'city',
                 'state',
                 'profile_picture',
-                'about'
+                'about',
+                'userTags'
             )
         })
     )
@@ -69,7 +70,8 @@ class UserAdminConfig(UserAdmin):
                 'city',
                 'state',
                 'profile_picture',
-                'about'
+                'about',
+                'userTags'
             )
         })
     )
