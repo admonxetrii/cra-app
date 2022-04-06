@@ -88,3 +88,4 @@ class UserRestaurant(models.Model):
 
     class Meta:
         db_table = "RESTAURANT_USER"
+

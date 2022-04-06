@@ -197,3 +197,27 @@ class MergeTable(models.Model):
 
     class Meta:
         db_table = "TABLE_MERGE"
+
+
+class LikeTags(models.Model):
+    tags = models.CharField(max_length=256)
+    icon = models.ImageField(upload_to='likeTags/icons')
+
+    class Meta:
+        db_table = "TAGS_MASTER"
+
+
+class UserTags(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
+    tag = models.ForeignKey(LikeTags, on_delete=models.CASCADE, related_name='user_tag')
+
+    class Meta:
+        db_table = "USER_TAGS"
+
+
+class RestaurantTags(models.Model):
+    restaurant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='restaurant')
+    tag = models.ForeignKey(LikeTags, on_delete=models.CASCADE, related_name='restaurant_tag')
+
+    class Meta:
+        db_table = "RESTAURANT_TAGS"
