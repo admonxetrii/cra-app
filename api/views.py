@@ -24,7 +24,7 @@ from algorithm.cosine_similarity import descriptionCosineSimilarity
 
 # Create your views here.
 
-class RestaurantCategoryAPIView(generics.ListAPIView):
+class RestaurantCategoryAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RestaurantCategorySerializer
@@ -32,10 +32,17 @@ class RestaurantCategoryAPIView(generics.ListAPIView):
     def get_queryset(self):
         request = self.request
         qs = RestaurantType.objects.all()
-        query = request.GET.get()
+        query = request.GET.get('q')
         if query is not None:
             qs = qs.filter(name__icontains=query)
         return qs
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(modifiedBy=self.request.user)
+
 
 
 class RestaurantAPIView(mixins.CreateModelMixin, generics.ListAPIView):
